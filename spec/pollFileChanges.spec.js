@@ -31,7 +31,7 @@ test('it returns all commits when no options fiven', async () => {
     ])
 })
 
-test('it returns an error when unknown owner given', async () => {
+test('it returns an empty commit list when unknown owner given', async () => {
     const commits = await this.pollFileChanges({
         token: GH_TOKEN,
         owner: 'definitely-unknown-user-42',
@@ -48,7 +48,7 @@ test('it returns an error when unknown owner given', async () => {
     ])
 })
 
-test('it returns an error when unknown repo given', async () => {
+test('it returns an empty commit list when unknown repo given', async () => {
     const commits = await this.pollFileChanges({
         token: GH_TOKEN,
         owner: OWNER,
