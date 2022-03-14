@@ -1,12 +1,15 @@
 {
     "name": "@poll-github-repo/action",
     "version": "0.0.1",
-    "source": "src/index.ts",
-    "main": "dist/main.js",
     "scripts": {
-        "build": "parcel build"
+        "build": "ncc build src/index.js -o dist",
+        "build-and-run": "yarn build && node dist/index.js"
     },
     "devDependencies": {
-        "parcel": "^2.3.2"
+        "@vercel/ncc": "^0.33.3"
+    },
+    "dependencies": {
+        "@actions/core": "^1.6.0",
+        "@actions/github": "^5.0.0"
     }
 }

@@ -1,4 +1,4 @@
-.env
+.env.json
 yarn.lock
 /node_modules
 /.parcel-cache
