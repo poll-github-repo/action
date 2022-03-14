@@ -1,0 +1,12 @@
+{
+    "name": "@poll-github-repo/action",
+    "version": "0.0.1",
+    "source": "src/index.ts",
+    "main": "dist/main.js",
+    "scripts": {
+        "build": "parcel build"
+    },
+    "devDependencies": {
+        "parcel": "^2.3.2"
+    }
+}
