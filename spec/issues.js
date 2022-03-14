@@ -1,5 +1,6 @@
 const ISSUE1 = {
     number: 1,
+    title: "poll-github-repo/dummy-repo@3a84a57",
     url: 'https://github.com/poll-github-repo/dummy-repo/issues/1',
     labels: ['test-label'],
     state: 'open',
@@ -8,6 +9,7 @@ const ISSUE1 = {
 
 const ISSUE2 = {
     number: 2,
+    title: "poll-github-repo/dummy-repo@1234567",
     url: 'https://github.com/poll-github-repo/dummy-repo/issues/2',
     labels: ['test-label', 'other-label'],
     state: 'open',

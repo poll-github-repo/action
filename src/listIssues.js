@@ -24,6 +24,7 @@ function listIssues(core) {
                 for (const issueData of data) {
                     let issue = {
                         number: issueData.number,
+                        title: issueData.title,
                         url: issueData.html_url,
                         labels: issueData.labels.map(label => label.name),
                         state: issueData.state,
