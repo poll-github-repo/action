@@ -1,41 +1,43 @@
-import * as github from '@actions/github';
-import * as core from '@actions/core';
+const github = require('@actions/github')
 
-export async function pollFileChanges(
-    token,
-    owner,
-    repo,
-    path,
-    since
-) {
-    const octokit = github.getOctokit(token);
+function pollFileChanges(core) {
+    return async function ({ token, owner, repo, path, since, per_page }) {
+        const octokit = github.getOctokit(token)
 
-    const iterator = octokit.paginate.iterator(
-        octokit.rest.repos.listCommits,
-        {
-            owner,
-            repo,
-            since,
-            path
-        }
-    );
-    const result = [];
-
-    core.startGroup(`Pulling commits from ${owner}/${repo} since="${since}", path="${path}"`);
-    for await (const { data } of iterator) {
-        core.debug(`Pulled a page with ${data.length} commits`);
-        for (const commitData of data) {
-            let commit = {
+        const iterator = octokit.paginate.iterator(
+            octokit.rest.repos.listCommits,
+            {
+                owner,
+                repo,
+                since,
                 path,
-                url: commitData.html_url,
-                sha: commitData.sha,
-                message: commitData.commit.message,
-                date: commitData.commit.author.date
-            };
-            core.debug(`Extracted commit ${JSON.stringify(commit)}`);
-            result.push(commit);
+                per_page
+            }
+        )
+        const result = []
+
+        core.startGroup(`Pulling commits from ${owner}/${repo} since="${since}", path="${path}"`)
+        try {
+            for await (const { data } of iterator) {
+                core.debug(`Pulled a page with ${data.length} commits`)
+                for (const commitData of data) {
+                    let commit = {
+                        path,
+                        url: commitData.html_url,
+                        sha: commitData.sha,
+                        message: commitData.commit.message,
+                        date: commitData.commit.author.date
+                    }
+                    core.debug(`Extracted commit ${JSON.stringify(commit)}`)
+                    result.push(commit)
+                }
+            }
+        } catch (err) {
+            core.setFailed(`Failed to pull data from GitHub: ${err}`)
         }
+        core.endGroup()
+        return result
     }
-    core.endGroup();
-    return result;
 }
+
+module.exports = pollFileChanges

@@ -3,10 +3,12 @@
     "version": "0.0.1",
     "scripts": {
         "build": "ncc build src/index.js -o dist",
+        "test": "jest",
         "build-and-run": "yarn build && node dist/index.js"
     },
     "devDependencies": {
-        "@vercel/ncc": "^0.33.3"
+        "@vercel/ncc": "^0.33.3",
+        "jest": "^27.5.1"
     },
     "dependencies": {
         "@actions/core": "^1.6.0",
