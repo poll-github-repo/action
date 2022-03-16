@@ -1,14 +1,7 @@
 import * as github from "@actions/github"
-
-export interface Core {
-    startGroup(message: string): void
-    debug(message: string): void
-    setFailed(message: string): void
-    endGroup(): void
-}
+import { ICore } from "./localOrGithubCore"
 
 interface Params {
-    token: string
     owner: string
     repo: string
     label: string
@@ -25,9 +18,11 @@ export interface Issue {
     createdAt: string
 }
 
-export function listIssuesWithCore(core: Core) {
+export function listIssuesWithCore(core: ICore) {
+    const token = core.getInput("token", { required: true })
+
     return async function listIssues(params: Params): Promise<Issue[]> {
-        const { token, owner, repo, label, per_page, since } = params
+        const { owner, repo, label, per_page, since } = params
         const octokit = github.getOctokit(token)
 
         const iterator = octokit.paginate.iterator(

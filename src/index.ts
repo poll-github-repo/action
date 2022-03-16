@@ -1,24 +1,28 @@
-import * as core from "@actions/core"
 import { pollFileChangesWithCore } from "./pollFileChanges"
 import { listIssuesWithCore } from "./listIssues"
-import computeDelta from "./computeDelta"
-
-import { GH_TOKEN } from "../.env.json"
+import { computeDeltaWithCore } from "./computeDelta"
+import { getCore } from "./localOrGithubCore"
 
 async function run() {
-    const commits = await pollFileChangesWithCore(core)({
-        token: GH_TOKEN,
+    const core = await getCore()
+
+    const pollFileChanges = pollFileChangesWithCore(core)
+    const listIssues = listIssuesWithCore(core)
+    const computeDelta = computeDeltaWithCore(core)
+
+    const commits = await pollFileChanges({
         owner: "poll-github-repo",
         repo: "dummy-repo",
         path: "data.txt"
     })
-    const issues = await listIssuesWithCore(core)({
-        token: GH_TOKEN,
+    const issues = await listIssues({
         owner: "poll-github-repo",
         repo: "dummy-repo",
         label: "test-label"
     })
 
+    console.log(commits)
+    console.log(issues)
     const delta = computeDelta(commits, issues)
     console.log(delta)
 }

@@ -1,14 +1,7 @@
 import * as github from "@actions/github"
-
-export interface Core {
-    startGroup(message: string): void
-    debug(message: string): void
-    setFailed(message: string): void
-    endGroup(): void
-}
+import { ICore } from "./localOrGithubCore"
 
 interface Params {
-    token: string
     owner: string
     repo: string
     path: string
@@ -24,9 +17,11 @@ export interface Commit {
     date: string
 }
 
-export function pollFileChangesWithCore(core: Core) {
+export function pollFileChangesWithCore(core: ICore) {
+    const token = core.getInput("token", { required: true })
+
     return async function pollFileChanges(params: Params): Promise<Commit[]> {
-        const { token, owner, repo, path, since, per_page } = params
+        const { owner, repo, path, since, per_page } = params
         const octokit = github.getOctokit(token)
 
         const iterator = octokit.paginate.iterator(
@@ -51,7 +46,7 @@ export function pollFileChangesWithCore(core: Core) {
                         url: commitData.html_url,
                         sha: commitData.sha,
                         message: commitData.commit.message,
-                        date: commitData.commit.author.date
+                        date: commitData.commit.author?.date || "--unknown-date--"
                     }
                     core.debug(`Extracted commit ${JSON.stringify(commit)}`)
                     result.push(commit)

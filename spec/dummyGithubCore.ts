@@ -1,9 +1,24 @@
-import { Core as CommitsCore } from "../src/pollFileChanges"
-import { Core as IssuesCore } from "../src/listIssues"
+import { ICore, getLocalCore, InputKey } from "../src/localOrGithubCore"
 
-export default class DummyGithubCore implements CommitsCore, IssuesCore {
+export type InputOverrides = {
+    [K in InputKey]?: string
+}
+
+interface IDummyCore extends ICore {
+    getMessages(): string[]
+}
+
+export class DummyGithubCore implements IDummyCore {
     messages: string[] = []
+    localCore: ICore
+    inputOverrides?: InputOverrides
 
+    constructor(localCore: ICore, inputOverrides?: InputOverrides) {
+        this.localCore = localCore
+        this.inputOverrides = inputOverrides
+    }
+
+    // Record logging to run assertions against it
     startGroup(message: string) {
         this.messages.push(`startGroup: ${message}`)
     }
@@ -19,4 +34,28 @@ export default class DummyGithubCore implements CommitsCore, IssuesCore {
     setFailed(message: string) {
         this.messages.push(`setFaled: ${message}`)
     }
+
+    getMessages(): string[] {
+        return this.messages
+    }
+
+    // Support overriding inputs from inputOverrides passed to constructor
+    // If no override specified fallback to JSON config
+    getInput(name: InputKey, options?: { required?: boolean }): string {
+        if (this.inputOverrides) {
+            const override = this.inputOverrides[name]
+            if (override) {
+                return override
+            }
+        }
+        return this.localCore.getInput(name, options)
+    }
+}
+
+export async function getDummyGithubCore(overrides?: InputOverrides): Promise<IDummyCore> {
+    const localCore = await getLocalCore()
+    if (localCore == undefined) {
+        throw new Error("Failed to run tests without .env.json file")
+    }
+    return new DummyGithubCore(localCore, overrides)
 }
