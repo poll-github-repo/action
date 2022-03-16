@@ -1,9 +1,9 @@
 import { renderIssueTemplatesWithCore } from "../src/renderIssueTemplates"
-import { getDummyGithubCore, InputOverrides } from "./dummyGithubCore"
+import { getTestCore, InputOverrides } from "./testCore"
 import { COMMIT1, COMMIT2 } from "./commits"
 
 async function setup(overrides?: InputOverrides) {
-    const core = await getDummyGithubCore(overrides)
+    const core = await getTestCore(overrides)
     const renderIssueTemplates = renderIssueTemplatesWithCore(core)
     return { core, renderIssueTemplates }
 }

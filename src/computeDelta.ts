@@ -1,6 +1,6 @@
 import { Commit } from "./pollFileChanges"
 import { Issue } from "./listIssues"
-import { ICore, MatchingStrategy } from "./localOrGithubCore"
+import { ICore, Inputs } from "./core"
 
 function matchByShaShort(commit: Commit, issue: Issue) {
     const shaShort = commit.sha.slice(0, 7)
@@ -12,7 +12,7 @@ function matchByShaFull(commit: Commit, issue: Issue) {
 }
 
 function getMatchingStrategy(core: ICore) {
-    const strategy = core.getInput("matching-strategy", { required: true }) as MatchingStrategy
+    const strategy = core.getInput("matching-strategy", { required: true }) as Inputs["matching-strategy"]
 
     switch (strategy) {
         case "sha-short":

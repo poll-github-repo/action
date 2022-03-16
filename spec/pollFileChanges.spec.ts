@@ -1,5 +1,5 @@
 import { pollFileChangesWithCore } from "../src/pollFileChanges"
-import { getDummyGithubCore, InputOverrides } from "./dummyGithubCore"
+import { getTestCore, InputOverrides } from "./testCore"
 import { COMMIT1, COMMIT2, COMMIT3 } from "./commits"
 
 const DEFAULTS = {
@@ -9,7 +9,7 @@ const DEFAULTS = {
 }
 
 async function setup(overrides?: InputOverrides) {
-    const core = await getDummyGithubCore({ ...DEFAULTS, ...overrides })
+    const core = await getTestCore({ ...DEFAULTS, ...overrides })
     const pollFileChanges = pollFileChangesWithCore(core)
     return { core, pollFileChanges }
 }

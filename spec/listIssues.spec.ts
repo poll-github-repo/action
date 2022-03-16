@@ -1,5 +1,5 @@
 import { listIssuesWithCore } from "../src/listIssues"
-import { getDummyGithubCore, InputOverrides } from "./dummyGithubCore"
+import { getTestCore, InputOverrides } from "./testCore"
 import { ISSUE1, ISSUE2 } from "./issues"
 
 const DEFAULTS = {
@@ -9,7 +9,7 @@ const DEFAULTS = {
 }
 
 async function setup(overrides?: InputOverrides) {
-    const core = await getDummyGithubCore({ ...DEFAULTS, ...overrides })
+    const core = await getTestCore({ ...DEFAULTS, ...overrides })
     const listIssues = listIssuesWithCore(core)
     return { core, listIssues }
 }

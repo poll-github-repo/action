@@ -1,5 +1,5 @@
 import { Commit } from "./pollFileChanges"
-import { ICore } from "./localOrGithubCore"
+import { ICore } from "./core"
 
 export interface IssueToCreate {
     title: string

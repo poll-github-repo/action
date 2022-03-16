@@ -1,5 +1,5 @@
 import * as github from "@actions/github"
-import { ICore } from "./localOrGithubCore"
+import { ICore } from "./core"
 
 interface Params {
     since?: string

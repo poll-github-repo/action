@@ -1,7 +1,8 @@
+import { getCore } from "./core"
+
 import { pollFileChangesWithCore } from "./pollFileChanges"
 import { listIssuesWithCore } from "./listIssues"
 import { computeDeltaWithCore } from "./computeDelta"
-import { getCore } from "./localOrGithubCore"
 import { renderIssueTemplatesWithCore } from "./renderIssueTemplates"
 
 async function run() {

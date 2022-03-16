@@ -1,10 +1,10 @@
 import { computeDeltaWithCore } from "../src/computeDelta"
-import { getDummyGithubCore, InputOverrides } from "./dummyGithubCore"
+import { getTestCore, InputOverrides } from "./testCore"
 import { COMMIT1, COMMIT2, COMMIT3 } from "./commits"
 import { ISSUE1, ISSUE2 } from "./issues"
 
 async function setup(overrides?: InputOverrides) {
-    const core = await getDummyGithubCore(overrides)
+    const core = await getTestCore(overrides)
     const computeDelta = computeDeltaWithCore(core)
     return { core, computeDelta }
 }
