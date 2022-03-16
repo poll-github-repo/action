@@ -2,9 +2,6 @@ import * as github from "@actions/github"
 import { ICore } from "./localOrGithubCore"
 
 interface Params {
-    owner: string
-    repo: string
-    path: string
     since?: string
     per_page?: number
 }
@@ -19,9 +16,12 @@ export interface Commit {
 
 export function pollFileChangesWithCore(core: ICore) {
     const token = core.getInput("token", { required: true })
+    const owner = core.getInput("owner", { required: true })
+    const repo = core.getInput("repo", { required: true })
+    const path = core.getInput("path", { required: true })
 
-    return async function pollFileChanges(params: Params): Promise<Commit[]> {
-        const { owner, repo, path, since, per_page } = params
+    return async function pollFileChanges(params?: Params): Promise<Commit[]> {
+        const { since, per_page } = params || {}
         const octokit = github.getOctokit(token)
 
         const iterator = octokit.paginate.iterator(

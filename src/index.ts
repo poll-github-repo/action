@@ -12,11 +12,7 @@ async function run() {
     const computeDelta = computeDeltaWithCore(core)
     const renderIssueTemplates = renderIssueTemplatesWithCore(core)
 
-    const commits = await pollFileChanges({
-        owner: "poll-github-repo",
-        repo: "dummy-repo",
-        path: "data.txt"
-    })
+    const commits = await pollFileChanges({})
     console.log(commits)
 
     const issues = await listIssues({

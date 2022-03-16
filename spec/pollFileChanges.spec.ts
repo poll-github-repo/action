@@ -1,12 +1,15 @@
 import { pollFileChangesWithCore } from "../src/pollFileChanges"
 import { getDummyGithubCore, InputOverrides } from "./dummyGithubCore"
-const OWNER = "poll-github-repo"
-const REPO = "dummy-repo"
-const PATH = "data.txt"
 import { COMMIT1, COMMIT2, COMMIT3 } from "./commits"
 
+const DEFAULTS = {
+    owner: "poll-github-repo",
+    repo: "dummy-repo",
+    path: "data.txt"
+}
+
 async function setup(overrides?: InputOverrides) {
-    const core = await getDummyGithubCore(overrides)
+    const core = await getDummyGithubCore({ ...DEFAULTS, ...overrides })
     const pollFileChanges = pollFileChangesWithCore(core)
     return { core, pollFileChanges }
 }
@@ -14,15 +17,9 @@ async function setup(overrides?: InputOverrides) {
 describe("when no options given", () => {
     it.concurrent("it returns all commits", async () => {
         const { core, pollFileChanges } = await setup()
-
-        const commits = await pollFileChanges({
-            owner: OWNER,
-            repo: REPO,
-            path: PATH
-        })
+        const commits = await pollFileChanges()
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
-
         expect(core.getMessages()).toEqual([
             `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="data.txt"`,
             `debug: Pulled a page with 3 commits`,
@@ -37,13 +34,7 @@ describe("when no options given", () => {
 describe("when SINCE specified", () => {
     it.concurrent("it returns a subset", async () => {
         const { pollFileChanges } = await setup()
-
-        const commits = await pollFileChanges({
-            owner: OWNER,
-            repo: REPO,
-            path: PATH,
-            since: COMMIT2.date
-        })
+        const commits = await pollFileChanges({ since: COMMIT2.date })
 
         expect(commits).toEqual([COMMIT3, COMMIT2])
     })
@@ -52,13 +43,7 @@ describe("when SINCE specified", () => {
 describe("when there are multiple pages", () => {
     it.concurrent("it still returns all commits", async () => {
         const { core, pollFileChanges } = await setup()
-
-        const commits = await pollFileChanges({
-            owner: OWNER,
-            repo: REPO,
-            path: PATH,
-            per_page: 1
-        })
+        const commits = await pollFileChanges({ per_page: 1 })
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
         expect(core.getMessages()).toEqual([
@@ -78,16 +63,10 @@ describe("when there are multiple pages", () => {
 describe("failures", () => {
     describe("when unknown owner given", () => {
         it.concurrent("it returns an empty commit list", async () => {
-            const { core, pollFileChanges } = await setup()
-
-            const commits = await pollFileChanges({
-                owner: "definitely-unknown-user-42",
-                repo: REPO,
-                path: PATH
-            })
+            const { core, pollFileChanges } = await setup({ owner: "definitely-unknown-user-42" })
+            const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
-
             expect(core.getMessages()).toEqual([
                 `startGroup: Pulling commits from definitely-unknown-user-42/dummy-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
@@ -98,16 +77,10 @@ describe("failures", () => {
 
     describe("when unknown repo given", () => {
         it.concurrent("it returns an empty commit list", async () => {
-            const { core, pollFileChanges } = await setup()
-
-            const commits = await pollFileChanges({
-                owner: OWNER,
-                repo: "unknown-repo",
-                path: PATH
-            })
+            const { core, pollFileChanges } = await setup({ repo: "unknown-repo" })
+            const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
-
             expect(core.getMessages()).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/unknown-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
@@ -118,16 +91,10 @@ describe("failures", () => {
 
     describe("when unknown path given", () => {
         it.concurrent("it returns an empty list of commits", async () => {
-            const { core, pollFileChanges } = await setup()
-
-            const commits = await pollFileChanges({
-                owner: OWNER,
-                repo: REPO,
-                path: "missing.txt"
-            })
+            const { core, pollFileChanges } = await setup({ path: "missing.txt" })
+            const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
-
             expect(core.getMessages()).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="missing.txt"`,
                 `debug: Pulled a page with 0 commits`,
@@ -139,12 +106,7 @@ describe("failures", () => {
     describe("when invalid token given", () => {
         it.concurrent("it returns an empty commit list ", async () => {
             const { core, pollFileChanges } = await setup({ token: "invalid-token" })
-
-            const commits = await pollFileChanges({
-                owner: OWNER,
-                repo: REPO,
-                path: PATH,
-            })
+            const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
             expect(core.getMessages()).toEqual([
