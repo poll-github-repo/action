@@ -1,8 +1,6 @@
-import { ICore, getLocalCore, InputKey } from "../src/localOrGithubCore"
+import { ICore, getLocalCore, InputKey, LocalConfig } from "../src/localOrGithubCore"
 
-export type InputOverrides = {
-    [K in InputKey]?: string
-}
+export type InputOverrides = Partial<LocalConfig["inputs"]>
 
 interface IDummyCore extends ICore {
     getMessages(): string[]

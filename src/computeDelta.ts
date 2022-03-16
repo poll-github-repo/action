@@ -1,40 +1,42 @@
 import { Commit } from "./pollFileChanges"
 import { Issue } from "./listIssues"
-import { ICore } from "./localOrGithubCore"
+import { ICore, MatchingStrategy } from "./localOrGithubCore"
 
-type MatchFn = (commit: Commit, issue: Issue) => boolean
-
-function matchByShaShort(commit: Commit, issue: Issue): boolean {
+function matchByShaShort(commit: Commit, issue: Issue) {
     const shaShort = commit.sha.slice(0, 7)
     return issue.title.includes(shaShort)
 }
 
-function matchByShaFull(commit: Commit, issue: Issue): boolean {
+function matchByShaFull(commit: Commit, issue: Issue) {
     return issue.title.includes(commit.sha)
 }
 
-function getMatchingStrategy(core: ICore): MatchFn {
-    const strategy = core.getInput("matching-strategy", { required: true })
+function getMatchingStrategy(core: ICore) {
+    const strategy = core.getInput("matching-strategy", { required: true }) as MatchingStrategy
 
     switch (strategy) {
         case "sha-short":
             return matchByShaShort
-        case "sha-long":
+        case "sha-full":
             return matchByShaFull
         default:
-            const message = `Unsupported "matching-strategy" input ${strategy} (supported are: sha-short, sha-full)`;
+            const message = `Unsupported "matching-strategy" input ${strategy} (supported are: sha-short, sha-full)`
             core.setFailed(message)
-            throw new Error(message)
+            return null
     }
 }
 
 export function computeDeltaWithCore(core: ICore) {
     const issueMatchesCommit = getMatchingStrategy(core)
 
-    return function computeDelta(commits: Commit[], issues: Issue[]): Commit[] {
+    return function computeDelta(commits: Commit[], issues: Issue[]) {
+        if (issueMatchesCommit == null) {
+            return []
+        }
+
         return commits.filter(commit => {
             const matchingIssueIdx = issues.findIndex(issue => issueMatchesCommit(commit, issue))
-            return matchingIssueIdx != -1
+            return matchingIssueIdx == -1
         })
     }
 }

@@ -10,13 +10,14 @@ export interface ICore {
     getInput(name: InputKey, options?: { required?: boolean }): string
 }
 
-interface LocalConfig {
+export interface LocalConfig {
     inputs: {
-        "matching-strategy": string
+        "matching-strategy": "sha-short" | "sha-full"
         token: string
     }
 }
 export type InputKey = keyof LocalConfig["inputs"]
+export type MatchingStrategy = LocalConfig["inputs"]["matching-strategy"]
 
 class LocalCore implements ICore {
     config: LocalConfig
@@ -43,7 +44,7 @@ class LocalCore implements ICore {
     getInput(name: InputKey, options?: { required?: boolean }): string {
         const value = this.config.inputs[name]
         if (typeof (value) === "undefined" && options && options.required) {
-            throw new Error(`Input required and not supplied: ${name}`);
+            throw new Error(`Input required and not supplied: ${name}`)
         }
         return value
     }
