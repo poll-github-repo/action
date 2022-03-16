@@ -1,7 +1,33 @@
-const github = require('@actions/github')
+import * as github from "@actions/github"
 
-function listIssues(core) {
-    return async function ({ token, owner, repo, label, per_page, since }) {
+interface Core {
+    startGroup(message: string)
+    debug(message: string)
+    setFailed(message: string)
+    endGroup()
+}
+
+interface Params {
+    token: string
+    owner: string
+    repo: string
+    label: string
+    since?: string
+    per_page?: number
+}
+
+export interface Issue {
+    number: number
+    title: string
+    url: string
+    labels: string[]
+    state: string
+    createdAt: string
+}
+
+export function listIssuesWithCore(core: Core) {
+    return async function listIssues(params: Params): Promise<Issue[]> {
+        const { token, owner, repo, label, per_page, since } = params
         const octokit = github.getOctokit(token)
 
         const iterator = octokit.paginate.iterator(
@@ -9,24 +35,30 @@ function listIssues(core) {
             {
                 owner,
                 repo,
-                labels: [label],
+                labels: label,
                 per_page,
                 since
             }
         )
 
-        const result = []
+        const result: Issue[] = []
 
         core.startGroup(`Pulling issues from ${owner}/${repo} with label "${label}"`)
         try {
             for await (const { data } of iterator) {
                 core.debug(`Pulled a page with ${data.length} issues`)
                 for (const issueData of data) {
-                    let issue = {
+                    let issue: Issue = {
                         number: issueData.number,
                         title: issueData.title,
                         url: issueData.html_url,
-                        labels: issueData.labels.map(label => label.name),
+                        labels: issueData.labels.map(label => {
+                            if (typeof (label) === "string") {
+                                return label
+                            } else {
+                                return label.name || "--unknown--"
+                            }
+                        }),
                         state: issueData.state,
                         createdAt: issueData.created_at
                     }
@@ -42,5 +74,3 @@ function listIssues(core) {
         return result
     }
 }
-
-module.exports = listIssues

@@ -1,9 +1,7 @@
-class DummyGithubCore {
-    constructor() {
-        this.messages = []
-    }
+export default class DummyGithubCore {
+    messages: string[] = []
 
-    startGroup(message) {
+    startGroup(message: string) {
         this.messages.push(`startGroup: ${message}`)
     }
 
@@ -11,13 +9,11 @@ class DummyGithubCore {
         this.messages.push(`endGroup`)
     }
 
-    debug(message) {
+    debug(message: string) {
         this.messages.push(`debug: ${message}`)
     }
 
-    setFailed(message) {
+    setFailed(message: string) {
         this.messages.push(`setFaled: ${message}`)
     }
 }
-
-module.exports = DummyGithubCore

@@ -1,7 +1,32 @@
-const github = require('@actions/github')
+import * as github from "@actions/github"
 
-function pollFileChanges(core) {
-    return async function ({ token, owner, repo, path, since, per_page }) {
+interface Core {
+    startGroup(message: string)
+    debug(message: string)
+    setFailed(message: string)
+    endGroup()
+}
+
+interface Params {
+    token: string
+    owner: string
+    repo: string
+    path: string
+    since?: string
+    per_page?: number
+}
+
+export interface Commit {
+    path: string
+    url: string
+    sha: string
+    message: string
+    date: string
+}
+
+export function pollFileChangesWithCore(core: Core) {
+    return async function pollFileChanges(params: Params): Promise<Commit[]> {
+        const { token, owner, repo, path, since, per_page } = params
         const octokit = github.getOctokit(token)
 
         const iterator = octokit.paginate.iterator(
@@ -14,14 +39,14 @@ function pollFileChanges(core) {
                 per_page
             }
         )
-        const result = []
+        const result: Commit[] = []
 
         core.startGroup(`Pulling commits from ${owner}/${repo} since="${since}", path="${path}"`)
         try {
             for await (const { data } of iterator) {
                 core.debug(`Pulled a page with ${data.length} commits`)
                 for (const commitData of data) {
-                    let commit = {
+                    let commit: Commit = {
                         path,
                         url: commitData.html_url,
                         sha: commitData.sha,
@@ -39,5 +64,3 @@ function pollFileChanges(core) {
         return result
     }
 }
-
-module.exports = pollFileChanges
