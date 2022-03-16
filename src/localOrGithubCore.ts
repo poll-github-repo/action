@@ -19,6 +19,7 @@ export interface LocalConfig {
         owner: string
         repo: string
         path: string
+        label: string
     }
 }
 export type InputKey = keyof LocalConfig["inputs"]

@@ -2,9 +2,6 @@ import * as github from "@actions/github"
 import { ICore } from "./localOrGithubCore"
 
 interface Params {
-    owner: string
-    repo: string
-    label: string
     since?: string
     per_page?: number
 }
@@ -20,9 +17,12 @@ export interface Issue {
 
 export function listIssuesWithCore(core: ICore) {
     const token = core.getInput("token", { required: true })
+    const owner = core.getInput("owner", { required: true })
+    const repo = core.getInput("repo", { required: true })
+    const label = core.getInput("label", { required: true })
 
-    return async function listIssues(params: Params): Promise<Issue[]> {
-        const { owner, repo, label, per_page, since } = params
+    return async function listIssues(params?: Params): Promise<Issue[]> {
+        const { per_page, since } = params || {}
         const octokit = github.getOctokit(token)
 
         const iterator = octokit.paginate.iterator(

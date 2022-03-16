@@ -1,11 +1,15 @@
 import { listIssuesWithCore } from "../src/listIssues"
 import { getDummyGithubCore, InputOverrides } from "./dummyGithubCore"
-const OWNER = "poll-github-repo"
-const REPO = "dummy-repo"
 import { ISSUE1, ISSUE2 } from "./issues"
 
+const DEFAULTS = {
+    owner: "poll-github-repo",
+    repo: "dummy-repo",
+    label: "test-label"
+}
+
 async function setup(overrides?: InputOverrides) {
-    const core = await getDummyGithubCore(overrides)
+    const core = await getDummyGithubCore({ ...DEFAULTS, ...overrides })
     const listIssues = listIssuesWithCore(core)
     return { core, listIssues }
 }
@@ -13,12 +17,7 @@ async function setup(overrides?: InputOverrides) {
 describe("when no options given", () => {
     it.concurrent("returns all issues", async () => {
         const { core, listIssues } = await setup()
-
-        const issues = await listIssues({
-            owner: OWNER,
-            repo: REPO,
-            label: "test-label"
-        })
+        const issues = await listIssues()
 
         expect(issues).toEqual([ISSUE2, ISSUE1])
         expect(core.getMessages()).toEqual([
@@ -34,13 +33,7 @@ describe("when no options given", () => {
 describe("when SINCE specified", () => {
     it.concurrent("it returns a subset", async () => {
         const { listIssues } = await setup()
-
-        const issues = await listIssues({
-            owner: OWNER,
-            repo: REPO,
-            label: "test-label",
-            since: ISSUE2.createdAt
-        })
+        const issues = await listIssues({ since: ISSUE2.createdAt })
 
         expect(issues).toEqual([ISSUE2])
     })
@@ -49,13 +42,7 @@ describe("when SINCE specified", () => {
 describe("when there are multiple pages", () => {
     it.concurrent("it still returns all issues", async () => {
         const { core, listIssues } = await setup()
-
-        const issues = await listIssues({
-            owner: OWNER,
-            repo: REPO,
-            label: "test-label",
-            per_page: 1
-        })
+        const issues = await listIssues({ per_page: 1 })
 
         expect(issues).toEqual([ISSUE2, ISSUE1])
         expect(core.getMessages()).toEqual([
@@ -72,13 +59,8 @@ describe("when there are multiple pages", () => {
 describe("failures", () => {
     describe("when unknown owner given", () => {
         it.concurrent("it returns an empty list of issues", async () => {
-            const { core, listIssues } = await setup()
-
-            const issues = await listIssues({
-                owner: "definitely-unknown-user-42",
-                repo: REPO,
-                label: "test-label"
-            })
+            const { core, listIssues } = await setup({ owner: "definitely-unknown-user-42" })
+            const issues = await listIssues()
 
             expect(issues).toEqual([])
             expect(core.getMessages()).toEqual([
@@ -91,13 +73,8 @@ describe("failures", () => {
 
     describe("when unknown repo given", () => {
         it.concurrent("it returns an empty list of issues", async () => {
-            const { core, listIssues } = await setup()
-
-            const issues = await listIssues({
-                owner: OWNER,
-                repo: "unknown-repo",
-                label: "test-label"
-            })
+            const { core, listIssues } = await setup({ repo: "unknown-repo" })
+            const issues = await listIssues()
 
             expect(issues).toEqual([])
             expect(core.getMessages()).toEqual([
@@ -110,13 +87,8 @@ describe("failures", () => {
 
     describe("when unknown label given", () => {
         it.concurrent("it returns an empty list of issues", async () => {
-            const { core, listIssues } = await setup()
-
-            const issues = await listIssues({
-                owner: OWNER,
-                repo: REPO,
-                label: "unknown-label"
-            })
+            const { core, listIssues } = await setup({ label: "unknown-label" })
+            const issues = await listIssues()
 
             expect(issues).toEqual([])
             expect(core.getMessages()).toEqual([
@@ -130,12 +102,7 @@ describe("failures", () => {
     describe("when invalid token given", () => {
         it.concurrent("it returns an empty issue list", async () => {
             const { core, listIssues } = await setup({ token: "invalid-token" })
-
-            const issues = await listIssues({
-                owner: OWNER,
-                repo: REPO,
-                label: "test-label"
-            })
+            const issues = await listIssues()
 
             expect(issues).toEqual([])
             expect(core.getMessages()).toEqual([

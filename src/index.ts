@@ -15,11 +15,7 @@ async function run() {
     const commits = await pollFileChanges({})
     console.log(commits)
 
-    const issues = await listIssues({
-        owner: "poll-github-repo",
-        repo: "dummy-repo",
-        label: "test-label"
-    })
+    const issues = await listIssues()
     console.log(issues)
 
     const delta = computeDelta(commits, issues)
