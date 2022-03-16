@@ -12,8 +12,10 @@ export interface ICore {
 
 export interface LocalConfig {
     inputs: {
-        "matching-strategy": "sha-short" | "sha-full"
         token: string
+        "matching-strategy": "sha-short" | "sha-full",
+        "tracking-issue-title": string
+        "tracking-issue-body": string
     }
 }
 export type InputKey = keyof LocalConfig["inputs"]
