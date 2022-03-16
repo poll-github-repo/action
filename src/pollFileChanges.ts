@@ -1,10 +1,10 @@
 import * as github from "@actions/github"
 
-interface Core {
-    startGroup(message: string)
-    debug(message: string)
-    setFailed(message: string)
-    endGroup()
+export interface Core {
+    startGroup(message: string): void
+    debug(message: string): void
+    setFailed(message: string): void
+    endGroup(): void
 }
 
 interface Params {

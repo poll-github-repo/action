@@ -1,4 +1,7 @@
-export default class DummyGithubCore {
+import { Core as CommitsCore } from "../src/pollFileChanges"
+import { Core as IssuesCore } from "../src/listIssues"
+
+export default class DummyGithubCore implements CommitsCore, IssuesCore {
     messages: string[] = []
 
     startGroup(message: string) {
