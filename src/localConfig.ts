@@ -10,13 +10,14 @@ export interface Inputs {
     repo: string
     path: string
     label: string
+    "sync-path": string
 }
 
 export interface Env {
     GITHUB_REPOSITORY: string
 }
 
-function isObj<T>(value: T | null | undefined): value is T {
+function isObj<T>(value: any): value is T {
     return typeof (value) != null
 }
 
@@ -32,6 +33,10 @@ function formatErr(message: string): never {
     throw new Error(`Your .json.env file is malformed: ${message}`)
 }
 
+function stringInputErr(fieldName: string): never {
+    formatErr(`[inputs][${fieldName}] must be a string`)
+}
+
 export class LocalConfig {
     inputs: Inputs
     env: Env
@@ -44,36 +49,42 @@ export class LocalConfig {
     static async read(): Promise<LocalConfig> {
         const configPath = join(__dirname, "..", ".env.json")
 
-        const rawConfig = await fs.promises.readFile(configPath)
-        const { inputs, env } = JSON.parse(rawConfig.toString())
+        const configContent = await fs.promises.readFile(configPath)
+        const config = JSON.parse(configContent.toString())
+        const inputs: Partial<Inputs> | undefined = config.inputs
+        const env: Partial<Env> | undefined = config.env
 
-        if (!isObj(inputs)) formatErr("['inputs'] field must be an object")
+        if (!isObj<Partial<Inputs>>(inputs)) formatErr("[inputs] field must be an object")
 
         const token = inputs.token
-        if (!isString(token)) formatErr("['inputs']['token'] must be a string")
+        if (!isString(token)) stringInputErr("token")
 
         const matchingStrategy = inputs["matching-strategy"]
-        if (!isString(matchingStrategy)) formatErr("['inputs']['matching-strategy]' must be a string")
-        if (!isMatchingStrategy(matchingStrategy)) formatErr("['inputs']['matching-strategy]' must be either 'sha-short' or 'sha-full'")
+        if (!isString(matchingStrategy)) stringInputErr("matching-strategy")
+        if (!isMatchingStrategy(matchingStrategy)) formatErr(`[inputs][matching-strategy] must be either "sha-short" or "sha-full"`)
 
         const trackingIssueTitle = inputs["tracking-issue-title"]
-        if (!isString(trackingIssueTitle)) formatErr("['inputs']['tracking-issue-title'] must be a string")
+        if (!isString(trackingIssueTitle)) stringInputErr("tracking-issue-title")
 
         const trackingIssueBody = inputs["tracking-issue-body"]
-        if (!isString(trackingIssueBody)) formatErr("['inputs']['tracking-issue-body'] must be a string")
+        if (!isString(trackingIssueBody)) stringInputErr("tracking-issue-body")
 
         const owner = inputs.owner
-        if (!isString(owner)) formatErr("['inputs']['owner'] must be a string")
+        if (!isString(owner)) stringInputErr("owner")
         const repo = inputs.repo
-        if (!isString(repo)) formatErr("['inputs']['repo'] must be a string")
+        if (!isString(repo)) stringInputErr("repo")
         const path = inputs.path
-        if (!isString(path)) formatErr("['inputs']['path'] must be a string")
+        if (!isString(path)) stringInputErr("path")
         const label = inputs.label
-        if (!isString(label)) formatErr("['inputs']['label'] must be a string")
+        if (!isString(label)) stringInputErr("label")
+        const syncPath = inputs["sync-path"]
+        if (!isString(syncPath)) stringInputErr("sync-path")
 
-        if (!isObj(env)) formatErr("['env'] field must be an object")
+        console.log(inputs)
+
+        if (!isObj<Partial<Env>>(env)) formatErr("[env] field must be an object")
         const GITHUB_REPOSITORY = env.GITHUB_REPOSITORY
-        if (!isString(GITHUB_REPOSITORY)) formatErr("['env']['GITHUB_REPOSITORY'] must be a string")
+        if (!isString(GITHUB_REPOSITORY)) formatErr("[env][GITHUB_REPOSITORY] must be a string")
 
         return new LocalConfig(
             {
@@ -85,6 +96,7 @@ export class LocalConfig {
                 repo,
                 path,
                 label,
+                "sync-path": syncPath
             },
             {
                 GITHUB_REPOSITORY

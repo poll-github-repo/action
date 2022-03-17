@@ -4,6 +4,7 @@ import { pollFileChangesWithCore } from "./pollFileChanges"
 import { listIssuesWithCore } from "./listIssues"
 import { computeDeltaWithCore } from "./computeDelta"
 import { renderIssueTemplatesWithCore } from "./renderIssueTemplates"
+import { getLastSyncDateWithCore } from "./getLastSyncDate"
 import { getEnv } from "./env"
 
 async function run() {
@@ -15,8 +16,13 @@ async function run() {
     const listIssues = listIssuesWithCore(core, env)
     const computeDelta = computeDeltaWithCore(core)
     const renderIssueTemplates = renderIssueTemplatesWithCore(core)
+    const getLastSyncDate = getLastSyncDateWithCore(core, env)
 
-    const commits = await pollFileChanges({})
+    const lastSyncDate = await getLastSyncDate()
+
+    const commits = await pollFileChanges({
+        since: lastSyncDate!
+    })
     console.log(commits)
 
     const issues = await listIssues()
