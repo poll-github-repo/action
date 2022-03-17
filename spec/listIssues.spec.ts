@@ -1,16 +1,20 @@
 import { listIssuesWithCore } from "../src/listIssues"
 import { getTestCore, InputOverrides, getMessages } from "../src/core/dummy"
+import { getDummyEnv, EnvOverrides } from "../src/env/dummy"
 import { ISSUE1, ISSUE2 } from "./issues"
 
-const DEFAULTS = {
-    owner: "poll-github-repo",
-    repo: "dummy-repo",
+const DEFAULT_INPUTS = {
     label: "test-label"
 }
 
-async function setup(overrides?: InputOverrides) {
-    const core = await getTestCore({ ...DEFAULTS, ...overrides })
-    const listIssues = listIssuesWithCore(core)
+const DEFAULT_ENV = {
+    GITHUB_REPOSITORY: "poll-github-repo/dummy-repo"
+}
+
+async function setup(inputOverrides?: InputOverrides, envOverrides?: EnvOverrides) {
+    const core = await getTestCore({ ...DEFAULT_INPUTS, ...inputOverrides, owner: "does not matter", repo: "does not matter" })
+    const env = await getDummyEnv({ ...DEFAULT_ENV, ...envOverrides })
+    const listIssues = listIssuesWithCore(core, env)
     return { core, listIssues }
 }
 
@@ -59,7 +63,7 @@ describe("when there are multiple pages", () => {
 describe("failures", () => {
     describe("when unknown owner given", () => {
         it.concurrent("it returns an empty list of issues", async () => {
-            const { core, listIssues } = await setup({ owner: "definitely-unknown-user-42" })
+            const { core, listIssues } = await setup({}, { GITHUB_REPOSITORY: "definitely-unknown-user-42/dummy-repo" })
             const issues = await listIssues()
 
             expect(issues).toEqual([])
@@ -73,7 +77,7 @@ describe("failures", () => {
 
     describe("when unknown repo given", () => {
         it.concurrent("it returns an empty list of issues", async () => {
-            const { core, listIssues } = await setup({ repo: "unknown-repo" })
+            const { core, listIssues } = await setup({}, { GITHUB_REPOSITORY: "poll-github-repo/unknown-repo" })
             const issues = await listIssues()
 
             expect(issues).toEqual([])

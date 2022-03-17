@@ -1,5 +1,6 @@
 import * as github from "@actions/github"
 import { ICore } from "./core"
+import { BaseEnv } from "./env"
 
 interface Params {
     since?: string
@@ -15,10 +16,10 @@ export interface Issue {
     createdAt: string
 }
 
-export function listIssuesWithCore(core: ICore) {
+export function listIssuesWithCore(core: ICore, env: BaseEnv) {
     const token = core.getInput("token", { required: true })
-    const owner = core.getInput("owner", { required: true })
-    const repo = core.getInput("repo", { required: true })
+    const owner = env.getOwner()
+    const repo = env.getRepo()
     const label = core.getInput("label", { required: true })
 
     return async function listIssues(params?: Params): Promise<Issue[]> {

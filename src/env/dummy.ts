@@ -1,11 +1,13 @@
 import { BaseEnv } from "./base"
 import { LocalConfig } from "../localConfig"
-import { LocalEnv } from "./local"
+import { LocalEnv, getLocalEnv } from "./local"
+
+export type EnvOverrides = Partial<LocalConfig["env"]>
 
 export class DummyEnv extends BaseEnv {
-    overrides?: Partial<LocalConfig["env"]>
+    overrides?: EnvOverrides
 
-    constructor(localEnv: LocalEnv, overrides?: Partial<LocalConfig["env"]>) {
+    constructor(localEnv: LocalEnv, overrides?: EnvOverrides) {
         super(localEnv.env)
         this.overrides = overrides
     }
@@ -18,4 +20,9 @@ export class DummyEnv extends BaseEnv {
         }
         return parts
     }
+}
+
+export async function getDummyEnv(overrides?: EnvOverrides) {
+    const localEnv = await getLocalEnv()
+    return new DummyEnv(localEnv, overrides)
 }

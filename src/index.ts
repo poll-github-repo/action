@@ -12,7 +12,7 @@ async function run() {
     console.log("Env = ", env)
 
     const pollFileChanges = pollFileChangesWithCore(core)
-    const listIssues = listIssuesWithCore(core)
+    const listIssues = listIssuesWithCore(core, env)
     const computeDelta = computeDeltaWithCore(core)
     const renderIssueTemplates = renderIssueTemplatesWithCore(core)
 
