@@ -4,9 +4,12 @@ import { pollFileChangesWithCore } from "./pollFileChanges"
 import { listIssuesWithCore } from "./listIssues"
 import { computeDeltaWithCore } from "./computeDelta"
 import { renderIssueTemplatesWithCore } from "./renderIssueTemplates"
+import { getEnv } from "./env"
 
 async function run() {
     const core = await getCore()
+    const env = await getEnv()
+    console.log("Env = ", env)
 
     const pollFileChanges = pollFileChangesWithCore(core)
     const listIssues = listIssuesWithCore(core)

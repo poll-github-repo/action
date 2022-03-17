@@ -5,11 +5,6 @@ import { ICore } from "./types"
 import { getGithubCore } from "./github"
 import { getLocalCore } from "./local"
 
-export enum Mode {
-    Github,
-    Local,
-}
-
 const githubCore = getGithubCore()
 
 export async function getCore(): Promise<ICore> {
