@@ -10,3 +10,8 @@ export interface IssueToCreate {
     title: string
     body: string
 }
+
+export interface CreatedIssue {
+    number: number
+    url: string
+}

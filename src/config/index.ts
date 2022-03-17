@@ -11,7 +11,8 @@ export interface Config {
     repoToSync: string
     repoToSyncPath: string
     trackingIssueTemplateTitle: string
-    trackingIssueTemplateBody: string
+    trackingIssueTemplateBody: string[]
+    yesCreateIssues: boolean
 }
 
 export async function load(): Promise<Config> {

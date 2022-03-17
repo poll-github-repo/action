@@ -24,7 +24,7 @@ export function renderIssueTemplatesWith(config: Config) {
     return function renderIssueTemplates(commits: Commit[]): IssueToCreate[] {
         return commits.map(commit => ({
             title: render(titleTemplate, commit),
-            body: render(bodyTemplate, commit),
+            body: render(bodyTemplate.join("\n"), commit),
         }))
     }
 }

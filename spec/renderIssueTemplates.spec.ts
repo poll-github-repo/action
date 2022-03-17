@@ -22,7 +22,7 @@ it.concurrent("renders given template for every commit", async () => {
                 "url = {{ url }}",
                 // and render it again to make sure we replace globally
                 "url (again) = {{ url }}",
-            ].join("\n")
+            ]
         }
     })
 

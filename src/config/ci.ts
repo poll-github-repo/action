@@ -5,12 +5,12 @@ export function load(): Config {
     const [currentRepoOwner, currentRepo] = process.env["GITHUB_REPOSITORY"]!.split("/")
     if (!currentRepoOwner || !currentRepo) {
         core.setFailed(`$GITHUB_REPOSITORY is invalid: ${process.env["GITHUB_REPOSITORY"]}. GitHub bug?`)
-        throw new Error() // core.setFailed throws an error, but TS doesn't understand it
+        throw new Error() // core.setFailed throws an error, but TS does not understand it
     }
     const [repoToSyncOwner, repoToSync] = core.getInput("repo-to-sync", { required: true }).split("/")
     if (!repoToSyncOwner || !repoToSync) {
         core.setFailed(`"repo-to-sync" input must have a "owner/repo" format, got ${repoToSyncOwner}/${repoToSync}`)
-        throw new Error() // core.setFailed throws an error, but TS doesn't understand it
+        throw new Error() // core.setFailed throws an error, but TS does not understand it
     }
 
     return {
@@ -23,6 +23,7 @@ export function load(): Config {
         repoToSync: repoToSync,
         repoToSyncPath: core.getInput("path-to-sync", { required: true }),
         trackingIssueTemplateTitle: core.getInput("tracking-issue-title", { required: true }),
-        trackingIssueTemplateBody: core.getInput("tracking-issue-body", { required: true })
+        trackingIssueTemplateBody: core.getMultilineInput("tracking-issue-body", { required: true }),
+        yesCreateIssues: core.getBooleanInput("yesCreateIssues", { required: true })
     }
 }

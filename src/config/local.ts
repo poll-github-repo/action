@@ -27,6 +27,7 @@ namespace validations {
             repoToSyncPath,
             trackingIssueTemplateTitle,
             trackingIssueTemplateBody,
+            yesCreateIssues
         } = config
 
         if (!isString(token)) stringErr("token")
@@ -38,7 +39,8 @@ namespace validations {
         if (!isString(repoToSync)) stringErr("repoToSync")
         if (!isString(repoToSyncPath)) stringErr("repoToSyncPath")
         if (!isString(trackingIssueTemplateTitle)) stringErr("trackingIssueTemplateTitle")
-        if (!isString(trackingIssueTemplateBody)) stringErr("trackingIssueTemplateBody")
+        if (!Array.isArray(trackingIssueTemplateBody)) formatErr(`["trackingIssueTemplateBody"] must be an array of strings`)
+        if (yesCreateIssues !== true && yesCreateIssues !== false) formatErr(`["yesCreateIssues"] must be a boolean`)
 
         return {
             token,
@@ -51,6 +53,7 @@ namespace validations {
             repoToSyncPath,
             trackingIssueTemplateTitle,
             trackingIssueTemplateBody,
+            yesCreateIssues
         }
     }
 
