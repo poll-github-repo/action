@@ -8,9 +8,11 @@ import { createSyncCommitWith } from "./createSyncCommit"
 
 async function run() {
     const config = await loadConfig()
-    console.log("config = ", config)
-
     const logger = getLogger()
+
+    logger.startGroup("Config")
+    logger.debug(JSON.stringify(config, null, 4))
+    logger.endGroup()
 
     const getLastSyncDate = getLastSyncDateWith(config, logger)
     const pollCommits = pollCommitsWith(config, logger)
@@ -18,24 +20,37 @@ async function run() {
     const createTrackingIssues = createTrackingIssuesWith(config, logger)
     const createSyncCommit = createSyncCommitWith(config, logger)
 
-    const lastSyncDate = await getLastSyncDate()
+    logger.startGroup("Fetching last sync date")
+    const lastSyncDate = (await getLastSyncDate())!.trim()
+    logger.debug(`Last sync date is ${lastSyncDate}`)
+    logger.endGroup()
 
-    const commits = await pollCommits({ since: lastSyncDate! })
-    console.log(commits)
+    logger.startGroup(`Fetching commits since ${lastSyncDate}`)
+    const commits = await pollCommits({ since: lastSyncDate })
+    logger.debug(JSON.stringify(commits, null, 4))
+    logger.endGroup()
 
+    logger.startGroup("Starting rendering")
     const issuesToCreate = renderIssueTemplates(commits)
     issuesToCreate.forEach(({ title, body }) => {
-        console.log("=== TITLE")
-        console.log(title)
-        console.log("=== BODY")
-        console.log(body)
+        logger.debug("=== TITLE")
+        logger.debug(title)
+        logger.debug("=== BODY")
+        logger.debug(body)
     })
+    logger.endGroup()
 
+    logger.startGroup("Creating tracking issues")
     const createdIssues = await createTrackingIssues(issuesToCreate)
-    console.log(createdIssues)
+    logger.debug(`Created issues:`)
+    logger.debug(JSON.stringify(createdIssues, null, 4))
+    logger.endGroup()
 
-    const syncCommit = await createSyncCommit()
-    console.log(syncCommit)
+    logger.startGroup("Saving last sync date")
+    const syncCommitUrl = await createSyncCommit()
+    logger.debug(`Created commit ${syncCommitUrl}`)
+    logger.endGroup()
+
 }
 
 run()

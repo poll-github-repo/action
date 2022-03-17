@@ -17,7 +17,7 @@ export function getLastSyncDateWith(config: Config, logger: Logger) {
         })
         const content: string | undefined = (data as unknown as { content?: string }).content
         if (!content) {
-            console.log(JSON.stringify(data, null, 4))
+            logger.debug(JSON.stringify(data, null, 4))
             logger.setFailed(`Failed to read "${cachePath}" file contents`)
             return null
         }

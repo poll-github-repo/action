@@ -7,8 +7,28 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
-    name: test
+  # test:
+  #   name: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v2
+
+  #     - name: setup node
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '16'
+
+  #     - name: install dependencies
+  #       run: yarn install
+
+  #     - name: run tests
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: yarn test
+
+  testItself:
+    name: test itself
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -22,7 +42,19 @@ jobs:
       - name: install dependencies
         run: yarn install
 
-      - name: run tests
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn test
+      - name: build
+        run: yarn build
+
+      - uses: ./
+        with:
+          repo-to-sync: poll-github-repo/dummy-repo
+          path-to-sync: data.txt
+          cache-path: .data.txt.last-sync
+          tracking-issue-label: upstream-data-txt
+          tracking-issue-title: "Update on {{ path }}: {{ sha-short }}"
+          tracking-issue-body: |
+            New commit in poll-github-repo/dummy-repo:
+
+            **{{ message }}** [link]({{ url }})
+          token: ${{ secrets.GITHUB_TOKEN }}
+          yes-create-issues: false

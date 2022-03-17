@@ -1,0 +1,59 @@
+name: Monitor changes to files in other repos and create tracking issues in your repo
+description: Cron-based job that continuously polls configured repo for changes and creates tracking issues for them
+author: Ilya Bylich
+
+inputs:
+  repo-to-sync:
+    description: |
+      Repository you want to monitor.
+      Must have a format "owner/repo" (like "facebook/react").
+    required: true
+  path-to-sync:
+    description: |
+      Path to the file in <repo-to-sync> that you want to monitor.
+      Can be something like "CHANGELOG.md".
+    required: true
+  cache-path:
+    description: |
+      Path to a local file that stores timestamps of the last check in ISO format.
+      This is required to check only a small subset of changes on every run.
+      Can be something like ".sync/CHANGELOG.md.last-sync".
+    required: true
+  tracking-issue-label:
+    description: Label you want to add to created issues.
+    required: true
+  tracking-issue-title:
+    description: |
+      Template for tracking issue title.
+      Supported placeholder (same as for body):
+      - {{ path }} - path of the file that is tracked, useful if you track multiple files
+      - {{ sha-short }} - short (7 chars) SHA of the observed commit
+      - {{ sha-full }} - full SHA of the observer commit
+      - {{ message }} - message of the observed commit
+      - {{ commit-date }} - creation date of the observer commit
+      - {{ url }} - GitHub URL that points to observer commit
+    required: true
+  tracking-issue-body:
+    description: |
+      Template for tracking issue body.
+      Supported placeholder (same as for title):
+      - {{ path }} - path of the file that is tracked, useful if you track multiple files
+      - {{ sha-short }} - short (7 chars) SHA of the observed commit
+      - {{ sha-full }} - full SHA of the observer commit
+      - {{ message }} - message of the observed commit
+      - {{ commit-date }} - creation date of the observer commit
+      - {{ url }} - GitHub URL that points to observer commit
+    required: true
+  token:
+    description: GitHub token, most probably you want "secrets.GITHUB_TOKEN"
+    required: true
+  yes-create-issues:
+    description: |
+      Boolean flag, must be set to 'true' if your configuration is ready.
+      It's recommended to test it first with 'false', just to make sure
+      that it won't create hundreds of issues.
+    required: true
+
+runs:
+  using: node16
+  main: dist/index.js

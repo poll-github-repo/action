@@ -18,12 +18,12 @@ export function load(): Config {
         currentRepoOwner,
         currentRepo,
         currentRepoCachePath: core.getInput("cache-path", { required: true }),
-        currentRepoLabelToAdd: core.getInput("issue-label", { required: true }),
+        currentRepoLabelToAdd: core.getInput("tracking-issue-label", { required: true }),
         repoToSyncOwner: repoToSyncOwner,
         repoToSync: repoToSync,
         repoToSyncPath: core.getInput("path-to-sync", { required: true }),
         trackingIssueTemplateTitle: core.getInput("tracking-issue-title", { required: true }),
         trackingIssueTemplateBody: core.getMultilineInput("tracking-issue-body", { required: true }),
-        yesCreateIssues: core.getBooleanInput("yesCreateIssues", { required: true })
+        yesCreateIssues: core.getBooleanInput("yes-create-issues", { required: true })
     }
 }
