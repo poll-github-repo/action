@@ -1,16 +1,16 @@
 import { renderIssueTemplatesWith } from "../src/renderIssueTemplates"
-import { load as loadTestConfig } from "../src/config/test"
 import { COMMIT1, COMMIT2 } from "./commits"
 import { Config } from "../src/config"
+import { testConfig } from "./testConfig"
 
-async function setup(overrides?: { config?: Partial<Config> }) {
-    const config = await loadTestConfig(overrides?.config)
+function setup(overrides?: { config?: Partial<Config> }) {
+    const config = { ...testConfig, ...overrides?.config }
     const renderIssueTemplates = renderIssueTemplatesWith(config)
     return { config, renderIssueTemplates }
 }
 
 it.concurrent("renders given template for every commit", async () => {
-    const { renderIssueTemplates } = await setup({
+    const { renderIssueTemplates } = setup({
         config: {
             trackingIssueTemplateTitle: "SHA short = {{ sha-short }}",
             trackingIssueTemplateBody: [

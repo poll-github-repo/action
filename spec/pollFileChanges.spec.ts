@@ -1,11 +1,11 @@
 import { pollCommitsWith } from "../src/pollCommits"
-import { load as loadTestConfig } from "../src/config/test"
 import { COMMIT1, COMMIT2, COMMIT3 } from "./commits"
 import { Config } from "../src/config"
 import { TestLogger } from "../src/logger/test"
+import { testConfig } from "./testConfig"
 
-async function setup(overrides?: { config?: Partial<Config> }) {
-    const config = await loadTestConfig(overrides?.config)
+function setup(overrides?: { config?: Partial<Config> }) {
+    const config = { ...testConfig, ...overrides?.config }
     const logger = new TestLogger()
     const pollCommits = pollCommitsWith(config, logger)
     return { config, logger, pollCommits }
@@ -13,7 +13,7 @@ async function setup(overrides?: { config?: Partial<Config> }) {
 
 describe("when no options given", () => {
     it.concurrent("it returns all commits", async () => {
-        const { logger, pollCommits } = await setup()
+        const { logger, pollCommits } = setup()
         const commits = await pollCommits()
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
@@ -30,7 +30,7 @@ describe("when no options given", () => {
 
 describe("when SINCE specified", () => {
     it.concurrent("it returns a subset", async () => {
-        const { pollCommits } = await setup()
+        const { pollCommits } = setup()
         const commits = await pollCommits({ since: COMMIT2.date })
 
         expect(commits).toEqual([COMMIT3, COMMIT2])
@@ -39,7 +39,7 @@ describe("when SINCE specified", () => {
 
 describe("when there are multiple pages", () => {
     it.concurrent("it still returns all commits", async () => {
-        const { logger, pollCommits } = await setup()
+        const { logger, pollCommits } = setup()
         const commits = await pollCommits({ per_page: 1 })
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
@@ -60,7 +60,7 @@ describe("when there are multiple pages", () => {
 describe("failures", () => {
     describe("when unknown owner given", () => {
         it.concurrent("it returns an empty commit list", async () => {
-            const { logger, pollCommits } = await setup({ config: { repoToSyncOwner: "definitely-unknown-user-42" } })
+            const { logger, pollCommits } = setup({ config: { repoToSyncOwner: "definitely-unknown-user-42" } })
             const commits = await pollCommits()
 
             expect(commits).toEqual([])
@@ -74,7 +74,7 @@ describe("failures", () => {
 
     describe("when unknown repo given", () => {
         it.concurrent("it returns an empty commit list", async () => {
-            const { logger, pollCommits } = await setup({ config: { repoToSync: "unknown-repo" } })
+            const { logger, pollCommits } = setup({ config: { repoToSync: "unknown-repo" } })
             const commits = await pollCommits()
 
             expect(commits).toEqual([])
@@ -88,7 +88,7 @@ describe("failures", () => {
 
     describe("when unknown path given", () => {
         it.concurrent("it returns an empty list of commits", async () => {
-            const { logger, pollCommits } = await setup({ config: { repoToSyncPath: "missing.txt" } })
+            const { logger, pollCommits } = setup({ config: { repoToSyncPath: "missing.txt" } })
             const commits = await pollCommits()
 
             expect(commits).toEqual([])
@@ -102,7 +102,7 @@ describe("failures", () => {
 
     describe("when invalid token given", () => {
         it.concurrent("it returns an empty commit list ", async () => {
-            const { logger, pollCommits } = await setup({ config: { token: "invalid-token" } })
+            const { logger, pollCommits } = setup({ config: { token: "invalid-token" } })
             const commits = await pollCommits()
 
             expect(commits).toEqual([])
