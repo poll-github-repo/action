@@ -1,9 +1,14 @@
 import { join } from "path"
 import * as fs from "fs"
 
+export enum MatchingStrategy {
+    SHA_SHORT = "sha-short",
+    SHA_FULL = "sha-full"
+}
+
 export interface Inputs {
     token: string
-    "matching-strategy": "sha-short" | "sha-full"
+    "matching-strategy": MatchingStrategy.SHA_SHORT | MatchingStrategy.SHA_FULL
     "tracking-issue-title": string
     "tracking-issue-body": string
     owner: string
@@ -15,26 +20,6 @@ export interface Inputs {
 
 export interface Env {
     GITHUB_REPOSITORY: string
-}
-
-function isObj<T>(value: any): value is T {
-    return typeof (value) != null
-}
-
-function isString(value: any): value is string {
-    return typeof (value) === "string"
-}
-
-function isMatchingStrategy(value: string): value is Inputs["matching-strategy"] {
-    return (value === "sha-short") || (value == "sha-full")
-}
-
-function formatErr(message: string): never {
-    throw new Error(`Your .json.env file is malformed: ${message}`)
-}
-
-function stringInputErr(fieldName: string): never {
-    formatErr(`[inputs][${fieldName}] must be a string`)
 }
 
 export class LocalConfig {
@@ -50,57 +35,97 @@ export class LocalConfig {
         const configPath = join(__dirname, "..", ".env.json")
 
         const configContent = await fs.promises.readFile(configPath)
-        const config = JSON.parse(configContent.toString())
-        const inputs: Partial<Inputs> | undefined = config.inputs
-        const env: Partial<Env> | undefined = config.env
+        const maybeConfig = JSON.parse(configContent.toString())
+        const config = validations.validateConfig(maybeConfig)
 
-        if (!isObj<Partial<Inputs>>(inputs)) formatErr("[inputs] field must be an object")
+        return new LocalConfig(config.inputs, config.env)
+    }
+}
 
-        const token = inputs.token
-        if (!isString(token)) stringInputErr("token")
+namespace validations {
+    type UnknownObject = {
+        [K in string]?: unknown
+    }
 
-        const matchingStrategy = inputs["matching-strategy"]
-        if (!isString(matchingStrategy)) stringInputErr("matching-strategy")
-        if (!isMatchingStrategy(matchingStrategy)) formatErr(`[inputs][matching-strategy] must be either "sha-short" or "sha-full"`)
+    export function validateConfig(config: any): { inputs: Inputs, env: Env } {
+        if (typeof (config) === "object") {
+            formatErr("expected JSON to contain an object")
+        }
 
-        const trackingIssueTitle = inputs["tracking-issue-title"]
-        if (!isString(trackingIssueTitle)) stringInputErr("tracking-issue-title")
+        const { inputs, env } = config
+        if (!inputs || (typeof (inputs) !== "object")) formatErr("[inputs] must be an object")
+        if (!env || (typeof (inputs) !== "object")) formatErr("[env] must be an object")
+        return {
+            inputs: validateInputs(inputs),
+            env: validateEnv(env)
+        }
+    }
 
-        const trackingIssueBody = inputs["tracking-issue-body"]
-        if (!isString(trackingIssueBody)) stringInputErr("tracking-issue-body")
+    function validateInputs(inputs: UnknownObject): Inputs {
+        const {
+            token,
+            "matching-strategy": matchingStrategy,
+            "tracking-issue-title": trackingIssueTitle,
+            "tracking-issue-body": trackingIssueBody,
+            owner,
+            repo,
+            path,
+            label,
+            "sync-path": syncPath,
+        } = inputs
 
-        const owner = inputs.owner
-        if (!isString(owner)) stringInputErr("owner")
-        const repo = inputs.repo
-        if (!isString(repo)) stringInputErr("repo")
-        const path = inputs.path
-        if (!isString(path)) stringInputErr("path")
-        const label = inputs.label
-        if (!isString(label)) stringInputErr("label")
-        const syncPath = inputs["sync-path"]
-        if (!isString(syncPath)) stringInputErr("sync-path")
+        function stringErr(fieldName: string): never {
+            formatErr(`[inputs][${fieldName}] must be a string`)
+        }
 
-        console.log(inputs)
+        if (!isString(token)) stringErr("token")
+        if (!isString(matchingStrategy)) stringErr("matchingStrategy")
+        if (!isString(trackingIssueTitle)) stringErr("trackingIssueTitle")
+        if (!isString(trackingIssueBody)) stringErr("trackingIssueBody")
+        if (!isString(owner)) stringErr("owner")
+        if (!isString(repo)) stringErr("repo")
+        if (!isString(path)) stringErr("path")
+        if (!isString(label)) stringErr("label")
+        if (!isString(syncPath)) stringErr("syncPath")
 
-        if (!isObj<Partial<Env>>(env)) formatErr("[env] field must be an object")
-        const GITHUB_REPOSITORY = env.GITHUB_REPOSITORY
-        if (!isString(GITHUB_REPOSITORY)) formatErr("[env][GITHUB_REPOSITORY] must be a string")
+        if ((matchingStrategy !== MatchingStrategy.SHA_SHORT) && (matchingStrategy !== MatchingStrategy.SHA_FULL)) {
+            formatErr(`[inputs][matching-strategy] must be either "${MatchingStrategy.SHA_SHORT}" or "${MatchingStrategy.SHA_FULL}"`)
+        }
 
-        return new LocalConfig(
-            {
-                token,
-                "matching-strategy": matchingStrategy,
-                "tracking-issue-title": trackingIssueTitle,
-                "tracking-issue-body": trackingIssueBody,
-                owner,
-                repo,
-                path,
-                label,
-                "sync-path": syncPath
-            },
-            {
-                GITHUB_REPOSITORY
-            }
-        )
+        return {
+            token,
+            "matching-strategy": matchingStrategy,
+            "tracking-issue-title": trackingIssueTitle,
+            "tracking-issue-body": trackingIssueBody,
+            owner,
+            repo,
+            path,
+            label,
+            "sync-path": syncPath,
+        }
+    }
+
+    function validateEnv(env: UnknownObject): Env {
+        const {
+            GITHUB_REPOSITORY
+        } = env
+
+        function stringErr(varName: string): never {
+            formatErr(`[env][${varName}] must be a string`)
+        }
+
+        if (!isString(GITHUB_REPOSITORY)) stringErr("GITHUB_REPOSITORY")
+
+        return {
+            GITHUB_REPOSITORY
+        }
+    }
+
+    function isString(value: any): value is string {
+        return typeof (value) === "string"
+    }
+
+    function formatErr(message: string): never {
+        throw new Error(`Your .json.env file is malformed: ${message}`)
     }
 }
