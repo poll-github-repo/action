@@ -1,24 +1,24 @@
 import * as github from "@actions/github"
-import { ICore } from "./core"
-import { BaseEnv } from "./env"
+import { Config } from "./config"
+import { Logger } from "./logger"
 
-export function getLastSyncDateWithCore(core: ICore, env: BaseEnv) {
-    const token = core.getInput("token", { required: true })
-    const owner = env.getOwner()
-    const repo = env.getRepo()
-    const path = core.getInput("sync-path", { required: true })
+export function getLastSyncDateWith(config: Config, logger: Logger) {
+    const token = config.token
+    const owner = config.currentRepoOwner
+    const repo = config.currentRepo
+    const cachePath = config.currentRepoCachePath
 
     return async function getLastSyncDate() {
         const octokit = github.getOctokit(token)
         const { data } = await octokit.rest.repos.getContent({
             owner,
             repo,
-            path
+            path: cachePath
         })
         const content: string | undefined = (data as unknown as { content?: string }).content
         if (!content) {
             console.log(JSON.stringify(data, null, 4))
-            core.setFailed(`Failed to read "${path}" file contents`)
+            logger.setFailed(`Failed to read "${cachePath}" file contents`)
             return null
         }
         return Buffer.from(content, "base64").toString("ascii")

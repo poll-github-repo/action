@@ -1,4 +1,4 @@
-import { Commit } from "../src/pollFileChanges"
+import { Commit } from "../src/types"
 
 // This commit DOES have tracking issue
 export const COMMIT1: Commit = {

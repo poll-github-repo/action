@@ -1,12 +1,13 @@
-import { Inputs } from "../localConfig"
+import * as core from "@actions/core"
 
-export { Inputs }
-
-export interface ICore {
+export interface Logger {
     startGroup(name: string): void
     debug(message: string): void
     warning(message: string): void
     setFailed(message: string): void
     endGroup(): void
-    getInput(name: keyof Inputs, options?: { required?: boolean }): string
+}
+
+export function getLogger(): Logger {
+    return core
 }

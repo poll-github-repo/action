@@ -3,5 +3,6 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   verbose: true,
-  maxConcurrency: 20
+  maxConcurrency: 20,
+  testMatch: ["**/spec/**/*.spec.ts"]
 }

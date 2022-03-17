@@ -3,21 +3,15 @@ import { load as loadCI } from "./ci"
 
 export interface Config {
     token: string
-    currentRepo: {
-        owner: string
-        repo: string
-        cachePath: string
-        labelToAdd: string
-    }
-    repoToSync: {
-        owner: string
-        repo: string
-        pathToSync: string
-    }
-    trackingIssueTemplate: {
-        title: string
-        body: string
-    }
+    currentRepoOwner: string
+    currentRepo: string
+    currentRepoCachePath: string
+    currentRepoLabelToAdd: string
+    repoToSyncOwner: string
+    repoToSync: string
+    repoToSyncPath: string
+    trackingIssueTemplateTitle: string
+    trackingIssueTemplateBody: string
 }
 
 export async function load(): Promise<Config> {

@@ -1,37 +1,27 @@
-import { getCore } from "./core"
-
-import { pollFileChangesWithCore } from "./pollFileChanges"
-import { listIssuesWithCore } from "./listIssues"
-import { computeDeltaWithCore } from "./computeDelta"
-import { renderIssueTemplatesWithCore } from "./renderIssueTemplates"
-import { getLastSyncDateWithCore } from "./getLastSyncDate"
-import { getEnv } from "./env"
+import { pollCommitsWith } from "./pollCommits"
+import { renderIssueTemplatesWith } from "./renderIssueTemplates"
+import { getLastSyncDateWith } from "./getLastSyncDate"
+import { getLogger } from "./logger"
+import { load as loadConfig } from "./config"
 
 async function run() {
-    const core = await getCore()
-    const env = await getEnv()
-    console.log("Env = ", env)
+    const config = await loadConfig()
+    console.log("config = ", config)
 
-    const pollFileChanges = pollFileChangesWithCore(core)
-    const listIssues = listIssuesWithCore(core, env)
-    const computeDelta = computeDeltaWithCore(core)
-    const renderIssueTemplates = renderIssueTemplatesWithCore(core)
-    const getLastSyncDate = getLastSyncDateWithCore(core, env)
+    const logger = getLogger()
+
+    const getLastSyncDate = getLastSyncDateWith(config, logger)
+    const pollCommits = pollCommitsWith(config, logger)
+    const renderIssueTemplates = renderIssueTemplatesWith(config)
 
     const lastSyncDate = await getLastSyncDate()
 
-    const commits = await pollFileChanges({
+    const commits = await pollCommits({
         since: lastSyncDate!
     })
     console.log(commits)
 
-    const issues = await listIssues()
-    console.log(issues)
-
-    const delta = computeDelta(commits, issues)
-    console.log(delta)
-
-    const rendered = renderIssueTemplates(delta)
+    const rendered = renderIssueTemplates(commits)
     rendered.forEach(({ title, body }) => {
         console.log("=== TITLE")
         console.log(title)

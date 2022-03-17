@@ -15,20 +15,14 @@ export function load(): Config {
 
     return {
         token: core.getInput("token", { required: true }),
-        currentRepo: {
-            owner: currentRepoOwner,
-            repo: currentRepo,
-            cachePath: core.getInput("cache-path", { required: true }),
-            labelToAdd: core.getInput("issue-label", { required: true })
-        },
-        repoToSync: {
-            owner: repoToSyncOwner,
-            repo: repoToSync,
-            pathToSync: core.getInput("path-to-sync", { required: true })
-        },
-        trackingIssueTemplate: {
-            title: core.getInput("tracking-issue-title", { required: true }),
-            body: core.getInput("tracking-issue-body", { required: true })
-        }
+        currentRepoOwner,
+        currentRepo,
+        currentRepoCachePath: core.getInput("cache-path", { required: true }),
+        currentRepoLabelToAdd: core.getInput("issue-label", { required: true }),
+        repoToSyncOwner: repoToSyncOwner,
+        repoToSync: repoToSync,
+        repoToSyncPath: core.getInput("path-to-sync", { required: true }),
+        trackingIssueTemplateTitle: core.getInput("tracking-issue-title", { required: true }),
+        trackingIssueTemplateBody: core.getInput("tracking-issue-body", { required: true })
     }
 }

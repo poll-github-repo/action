@@ -1,26 +1,23 @@
-import { pollFileChangesWithCore } from "../src/pollFileChanges"
-import { getTestCore, InputOverrides, getMessages } from "../src/core/dummy"
+import { pollCommitsWith } from "../src/pollCommits"
+import { load as loadTestConfig } from "../src/config/test"
 import { COMMIT1, COMMIT2, COMMIT3 } from "./commits"
+import { Config } from "../src/config"
+import { TestLogger } from "../src/logger/test"
 
-const DEFAULTS = {
-    owner: "poll-github-repo",
-    repo: "dummy-repo",
-    path: "data.txt"
-}
-
-async function setup(overrides?: InputOverrides) {
-    const core = await getTestCore({ ...DEFAULTS, ...overrides })
-    const pollFileChanges = pollFileChangesWithCore(core)
-    return { core, pollFileChanges }
+async function setup(overrides?: { config?: Partial<Config> }) {
+    const config = await loadTestConfig(overrides?.config)
+    const logger = new TestLogger()
+    const pollCommits = pollCommitsWith(config, logger)
+    return { config, logger, pollCommits }
 }
 
 describe("when no options given", () => {
     it.concurrent("it returns all commits", async () => {
-        const { core, pollFileChanges } = await setup()
-        const commits = await pollFileChanges()
+        const { logger, pollCommits } = await setup()
+        const commits = await pollCommits()
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
-        expect(getMessages(core)).toEqual([
+        expect(logger.getMessages()).toEqual([
             `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="data.txt"`,
             `debug: Pulled a page with 3 commits`,
             `debug: Extracted commit {"path":"data.txt","url":"https://github.com/poll-github-repo/dummy-repo/commit/a52684431a3fda35c2ac4cde291071a3430f2268","sha":"a52684431a3fda35c2ac4cde291071a3430f2268","message":"update data.txt (three)","date":"2022-03-14T16:23:55Z"}`,
@@ -33,8 +30,8 @@ describe("when no options given", () => {
 
 describe("when SINCE specified", () => {
     it.concurrent("it returns a subset", async () => {
-        const { pollFileChanges } = await setup()
-        const commits = await pollFileChanges({ since: COMMIT2.date })
+        const { pollCommits } = await setup()
+        const commits = await pollCommits({ since: COMMIT2.date })
 
         expect(commits).toEqual([COMMIT3, COMMIT2])
     })
@@ -42,11 +39,11 @@ describe("when SINCE specified", () => {
 
 describe("when there are multiple pages", () => {
     it.concurrent("it still returns all commits", async () => {
-        const { core, pollFileChanges } = await setup()
-        const commits = await pollFileChanges({ per_page: 1 })
+        const { logger, pollCommits } = await setup()
+        const commits = await pollCommits({ per_page: 1 })
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
-        expect(getMessages(core)).toEqual([
+        expect(logger.getMessages()).toEqual([
             `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="data.txt"`,
             `debug: Pulled a page with 1 commits`,
             `debug: Extracted commit {"path":"data.txt","url":"https://github.com/poll-github-repo/dummy-repo/commit/a52684431a3fda35c2ac4cde291071a3430f2268","sha":"a52684431a3fda35c2ac4cde291071a3430f2268","message":"update data.txt (three)","date":"2022-03-14T16:23:55Z"}`,
@@ -63,11 +60,11 @@ describe("when there are multiple pages", () => {
 describe("failures", () => {
     describe("when unknown owner given", () => {
         it.concurrent("it returns an empty commit list", async () => {
-            const { core, pollFileChanges } = await setup({ owner: "definitely-unknown-user-42" })
-            const commits = await pollFileChanges()
+            const { logger, pollCommits } = await setup({ config: { repoToSyncOwner: "definitely-unknown-user-42" } })
+            const commits = await pollCommits()
 
             expect(commits).toEqual([])
-            expect(getMessages(core)).toEqual([
+            expect(logger.getMessages()).toEqual([
                 `startGroup: Pulling commits from definitely-unknown-user-42/dummy-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
                 `endGroup`,
@@ -77,11 +74,11 @@ describe("failures", () => {
 
     describe("when unknown repo given", () => {
         it.concurrent("it returns an empty commit list", async () => {
-            const { core, pollFileChanges } = await setup({ repo: "unknown-repo" })
-            const commits = await pollFileChanges()
+            const { logger, pollCommits } = await setup({ config: { repoToSync: "unknown-repo" } })
+            const commits = await pollCommits()
 
             expect(commits).toEqual([])
-            expect(getMessages(core)).toEqual([
+            expect(logger.getMessages()).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/unknown-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
                 `endGroup`,
@@ -91,11 +88,11 @@ describe("failures", () => {
 
     describe("when unknown path given", () => {
         it.concurrent("it returns an empty list of commits", async () => {
-            const { core, pollFileChanges } = await setup({ path: "missing.txt" })
-            const commits = await pollFileChanges()
+            const { logger, pollCommits } = await setup({ config: { repoToSyncPath: "missing.txt" } })
+            const commits = await pollCommits()
 
             expect(commits).toEqual([])
-            expect(getMessages(core)).toEqual([
+            expect(logger.getMessages()).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="missing.txt"`,
                 `debug: Pulled a page with 0 commits`,
                 `endGroup`,
@@ -105,11 +102,11 @@ describe("failures", () => {
 
     describe("when invalid token given", () => {
         it.concurrent("it returns an empty commit list ", async () => {
-            const { core, pollFileChanges } = await setup({ token: "invalid-token" })
-            const commits = await pollFileChanges()
+            const { logger, pollCommits } = await setup({ config: { token: "invalid-token" } })
+            const commits = await pollCommits()
 
             expect(commits).toEqual([])
-            expect(getMessages(core)).toEqual([
+            expect(logger.getMessages()).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Bad credentials`,
                 `endGroup`,

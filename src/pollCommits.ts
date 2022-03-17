@@ -1,24 +1,18 @@
 import * as github from "@actions/github"
-import { ICore } from "./core"
+import { Config } from "./config"
+import { Commit } from "./types"
+import { Logger } from "./logger"
 
 interface Params {
     since?: string
     per_page?: number
 }
 
-export interface Commit {
-    path: string
-    url: string
-    sha: string
-    message: string
-    date: string
-}
-
-export function pollFileChangesWithCore(core: ICore) {
-    const token = core.getInput("token", { required: true })
-    const owner = core.getInput("owner", { required: true })
-    const repo = core.getInput("repo", { required: true })
-    const path = core.getInput("path", { required: true })
+export function pollCommitsWith(config: Config, logger: Logger) {
+    const token = config.token
+    const owner = config.repoToSyncOwner
+    const repo = config.repoToSync
+    const path = config.repoToSyncPath
 
     return async function pollFileChanges(params?: Params): Promise<Commit[]> {
         const { since, per_page } = params || {}
@@ -36,10 +30,10 @@ export function pollFileChangesWithCore(core: ICore) {
         )
         const result: Commit[] = []
 
-        core.startGroup(`Pulling commits from ${owner}/${repo} since="${since}", path="${path}"`)
+        logger.startGroup(`Pulling commits from ${owner}/${repo} since="${since}", path="${path}"`)
         try {
             for await (const { data } of iterator) {
-                core.debug(`Pulled a page with ${data.length} commits`)
+                logger.debug(`Pulled a page with ${data.length} commits`)
                 for (const commitData of data) {
                     let commit: Commit = {
                         path,
@@ -48,14 +42,14 @@ export function pollFileChangesWithCore(core: ICore) {
                         message: commitData.commit.message,
                         date: commitData.commit.author?.date || "--unknown-date--"
                     }
-                    core.debug(`Extracted commit ${JSON.stringify(commit)}`)
+                    logger.debug(`Extracted commit ${JSON.stringify(commit)}`)
                     result.push(commit)
                 }
             }
         } catch (err) {
-            core.setFailed(`Failed to pull data from GitHub: ${err}`)
+            logger.setFailed(`Failed to pull data from GitHub: ${err}`)
         }
-        core.endGroup()
+        logger.endGroup()
         return result
     }
 }

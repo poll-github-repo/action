@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "scripts": {
         "build": "ncc build src/index.ts -o dist",
-        "test": "jest",
+        "test": "TEST_ENV=1 jest",
         "build-and-run": "yarn build && node dist/index.js"
     },
     "devDependencies": {

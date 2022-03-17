@@ -1,26 +1,29 @@
-import { renderIssueTemplatesWithCore } from "../src/renderIssueTemplates"
-import { getTestCore, InputOverrides } from "../src/core/dummy"
+import { renderIssueTemplatesWith } from "../src/renderIssueTemplates"
+import { load as loadTestConfig } from "../src/config/test"
 import { COMMIT1, COMMIT2 } from "./commits"
+import { Config } from "../src/config"
 
-async function setup(overrides?: InputOverrides) {
-    const core = await getTestCore(overrides)
-    const renderIssueTemplates = renderIssueTemplatesWithCore(core)
-    return { core, renderIssueTemplates }
+async function setup(overrides?: { config?: Partial<Config> }) {
+    const config = await loadTestConfig(overrides?.config)
+    const renderIssueTemplates = renderIssueTemplatesWith(config)
+    return { config, renderIssueTemplates }
 }
 
 it.concurrent("renders given template for every commit", async () => {
     const { renderIssueTemplates } = await setup({
-        "tracking-issue-title": "SHA short = {{ sha-short }}",
-        "tracking-issue-body": [
-            "path = {{ path }}",
-            "sha-short = {{ sha-short }}",
-            "sha-full = {{ sha-full }}",
-            "message = {{ message }}",
-            "commit-date = {{ commit-date }}",
-            "url = {{ url }}",
-            // and render it again to make sure we replace globally
-            "url (again) = {{ url }}",
-        ].join("\n")
+        config: {
+            trackingIssueTemplateTitle: "SHA short = {{ sha-short }}",
+            trackingIssueTemplateBody: [
+                "path = {{ path }}",
+                "sha-short = {{ sha-short }}",
+                "sha-full = {{ sha-full }}",
+                "message = {{ message }}",
+                "commit-date = {{ commit-date }}",
+                "url = {{ url }}",
+                // and render it again to make sure we replace globally
+                "url (again) = {{ url }}",
+            ].join("\n")
+        }
     })
 
     const rendered = renderIssueTemplates([COMMIT1, COMMIT2])

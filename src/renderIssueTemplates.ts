@@ -1,10 +1,5 @@
-import { Commit } from "./pollFileChanges"
-import { ICore } from "./core"
-
-export interface IssueToCreate {
-    title: string
-    body: string
-}
+import { Commit, IssueToCreate } from "./types"
+import { Config } from "./config"
 
 const PATTERNS = new Map<string, (commit: Commit) => string>()
 PATTERNS.set("path", (commit) => commit.path)
@@ -22,11 +17,11 @@ function render(template: string, commit: Commit) {
     return template
 }
 
-export function renderIssueTemplatesWithCore(core: ICore) {
-    const titleTemplate = core.getInput("tracking-issue-title", { required: true })
-    const bodyTemplate = core.getInput("tracking-issue-body", { required: true })
+export function renderIssueTemplatesWith(config: Config) {
+    const titleTemplate = config.trackingIssueTemplateTitle
+    const bodyTemplate = config.trackingIssueTemplateBody
 
-    return function renderIssueTemplates(commits: Commit[]) {
+    return function renderIssueTemplates(commits: Commit[]): IssueToCreate[] {
         return commits.map(commit => ({
             title: render(titleTemplate, commit),
             body: render(bodyTemplate, commit),
