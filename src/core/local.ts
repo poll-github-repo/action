@@ -1,11 +1,7 @@
-import * as path from "path"
-import * as fs from "fs"
-import { ICore, Inputs } from "./types"
+import { LocalConfig } from "../localConfig"
+import { ICore } from "./types"
+import { Inputs } from "../localConfig"
 import { getGithubCore } from "./github"
-
-export interface LocalConfig {
-    inputs: Inputs
-}
 
 class LocalCore implements ICore {
     githubCore: ICore
@@ -44,8 +40,6 @@ class LocalCore implements ICore {
 }
 
 export async function getLocalCore(): Promise<ICore> {
-    const configPath = path.join(__dirname, "..", "..", ".env.json")
-    const rawConfig = await fs.promises.readFile(configPath)
-    const config = JSON.parse(rawConfig.toString()) as LocalConfig
-    return new LocalCore(config)
+    const localConfig = await LocalConfig.read()
+    return new LocalCore(localConfig)
 }

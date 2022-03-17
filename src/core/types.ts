@@ -1,13 +1,6 @@
-export interface Inputs {
-    token: string
-    "matching-strategy": "sha-short" | "sha-full"
-    "tracking-issue-title": string
-    "tracking-issue-body": string
-    owner: string
-    repo: string
-    path: string
-    label: string
-}
+import { Inputs } from "../localConfig"
+
+export { Inputs }
 
 export interface ICore {
     startGroup(name: string): void
