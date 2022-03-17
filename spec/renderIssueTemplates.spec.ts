@@ -1,5 +1,5 @@
 import { renderIssueTemplatesWithCore } from "../src/renderIssueTemplates"
-import { getTestCore, InputOverrides } from "./testCore"
+import { getTestCore, InputOverrides } from "../src/core/dummy"
 import { COMMIT1, COMMIT2 } from "./commits"
 
 async function setup(overrides?: InputOverrides) {

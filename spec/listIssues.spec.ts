@@ -1,5 +1,5 @@
 import { listIssuesWithCore } from "../src/listIssues"
-import { getTestCore, InputOverrides } from "./testCore"
+import { getTestCore, InputOverrides, getMessages } from "../src/core/dummy"
 import { ISSUE1, ISSUE2 } from "./issues"
 
 const DEFAULTS = {
@@ -20,7 +20,7 @@ describe("when no options given", () => {
         const issues = await listIssues()
 
         expect(issues).toEqual([ISSUE2, ISSUE1])
-        expect(core.getMessages()).toEqual([
+        expect(getMessages(core)).toEqual([
             `startGroup: Pulling issues from poll-github-repo/dummy-repo with label "test-label"`,
             `debug: Pulled a page with 2 issues`,
             `debug: Extracted issue {"number":2,"title":"poll-github-repo/dummy-repo@1234567","url":"https://github.com/poll-github-repo/dummy-repo/issues/2","labels":["test-label","other-label"],"state":"open","createdAt":"2022-03-14T18:33:52Z"}`,
@@ -45,7 +45,7 @@ describe("when there are multiple pages", () => {
         const issues = await listIssues({ per_page: 1 })
 
         expect(issues).toEqual([ISSUE2, ISSUE1])
-        expect(core.getMessages()).toEqual([
+        expect(getMessages(core)).toEqual([
             `startGroup: Pulling issues from poll-github-repo/dummy-repo with label "test-label"`,
             `debug: Pulled a page with 1 issues`,
             `debug: Extracted issue {"number":2,"title":"poll-github-repo/dummy-repo@1234567","url":"https://github.com/poll-github-repo/dummy-repo/issues/2","labels":["test-label","other-label"],"state":"open","createdAt":"2022-03-14T18:33:52Z"}`,
@@ -63,7 +63,7 @@ describe("failures", () => {
             const issues = await listIssues()
 
             expect(issues).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling issues from definitely-unknown-user-42/dummy-repo with label "test-label"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
                 `endGroup`,
@@ -77,7 +77,7 @@ describe("failures", () => {
             const issues = await listIssues()
 
             expect(issues).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling issues from poll-github-repo/unknown-repo with label "test-label"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
                 `endGroup`,
@@ -91,7 +91,7 @@ describe("failures", () => {
             const issues = await listIssues()
 
             expect(issues).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling issues from poll-github-repo/dummy-repo with label "unknown-label"`,
                 `debug: Pulled a page with 0 issues`,
                 `endGroup`,
@@ -105,7 +105,7 @@ describe("failures", () => {
             const issues = await listIssues()
 
             expect(issues).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling issues from poll-github-repo/dummy-repo with label "test-label"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Bad credentials`,
                 `endGroup`,

@@ -1,5 +1,5 @@
 import { pollFileChangesWithCore } from "../src/pollFileChanges"
-import { getTestCore, InputOverrides } from "./testCore"
+import { getTestCore, InputOverrides, getMessages } from "../src/core/dummy"
 import { COMMIT1, COMMIT2, COMMIT3 } from "./commits"
 
 const DEFAULTS = {
@@ -20,7 +20,7 @@ describe("when no options given", () => {
         const commits = await pollFileChanges()
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
-        expect(core.getMessages()).toEqual([
+        expect(getMessages(core)).toEqual([
             `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="data.txt"`,
             `debug: Pulled a page with 3 commits`,
             `debug: Extracted commit {"path":"data.txt","url":"https://github.com/poll-github-repo/dummy-repo/commit/a52684431a3fda35c2ac4cde291071a3430f2268","sha":"a52684431a3fda35c2ac4cde291071a3430f2268","message":"update data.txt (three)","date":"2022-03-14T16:23:55Z"}`,
@@ -46,7 +46,7 @@ describe("when there are multiple pages", () => {
         const commits = await pollFileChanges({ per_page: 1 })
 
         expect(commits).toEqual([COMMIT3, COMMIT2, COMMIT1])
-        expect(core.getMessages()).toEqual([
+        expect(getMessages(core)).toEqual([
             `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="data.txt"`,
             `debug: Pulled a page with 1 commits`,
             `debug: Extracted commit {"path":"data.txt","url":"https://github.com/poll-github-repo/dummy-repo/commit/a52684431a3fda35c2ac4cde291071a3430f2268","sha":"a52684431a3fda35c2ac4cde291071a3430f2268","message":"update data.txt (three)","date":"2022-03-14T16:23:55Z"}`,
@@ -67,7 +67,7 @@ describe("failures", () => {
             const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling commits from definitely-unknown-user-42/dummy-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
                 `endGroup`,
@@ -81,7 +81,7 @@ describe("failures", () => {
             const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/unknown-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Not Found`,
                 `endGroup`,
@@ -95,7 +95,7 @@ describe("failures", () => {
             const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="missing.txt"`,
                 `debug: Pulled a page with 0 commits`,
                 `endGroup`,
@@ -109,7 +109,7 @@ describe("failures", () => {
             const commits = await pollFileChanges()
 
             expect(commits).toEqual([])
-            expect(core.getMessages()).toEqual([
+            expect(getMessages(core)).toEqual([
                 `startGroup: Pulling commits from poll-github-repo/dummy-repo since="undefined", path="data.txt"`,
                 `setFaled: Failed to pull data from GitHub: HttpError: Bad credentials`,
                 `endGroup`,

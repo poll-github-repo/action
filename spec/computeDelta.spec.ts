@@ -1,5 +1,5 @@
 import { computeDeltaWithCore } from "../src/computeDelta"
-import { getTestCore, InputOverrides } from "./testCore"
+import { getTestCore, InputOverrides, getMessages } from "../src/core/dummy"
 import { COMMIT1, COMMIT2, COMMIT3 } from "./commits"
 import { ISSUE1, ISSUE2 } from "./issues"
 
@@ -16,7 +16,7 @@ describe("when matching by sha-short strategy", () => {
         const delta = computeDelta([COMMIT1, COMMIT2, COMMIT3], [ISSUE1, ISSUE2])
         expect(delta).toEqual([COMMIT2, COMMIT3])
 
-        expect(core.getMessages()).toEqual([])
+        expect(getMessages(core)).toEqual([])
     })
 })
 
@@ -27,7 +27,7 @@ describe("when matching by sha-short strategy", () => {
         const delta = computeDelta([COMMIT1, COMMIT2, COMMIT3], [ISSUE1, ISSUE2])
         expect(delta).toEqual([COMMIT1, COMMIT2, COMMIT3])
 
-        expect(core.getMessages()).toEqual([])
+        expect(getMessages(core)).toEqual([])
     })
 })
 
@@ -38,7 +38,7 @@ describe("when matching by unknown strategy", () => {
         const delta = computeDelta([COMMIT1, COMMIT2, COMMIT3], [ISSUE1, ISSUE2])
         expect(delta).toEqual([])
 
-        expect(core.getMessages()).toEqual([
+        expect(getMessages(core)).toEqual([
             `setFaled: Unsupported "matching-strategy" input unknown (supported are: sha-short, sha-full)`
         ])
     })

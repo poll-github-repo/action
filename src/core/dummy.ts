@@ -1,14 +1,17 @@
-import { ICore, Inputs } from "../src/core/types"
-import { getLocalCore } from "../src/core/local"
+import { ICore, Inputs } from "./types"
+import { getLocalCore } from "./local"
 
-interface ITestCore extends ICore {
-    getMessages(): string[]
+const messagesRegistry = new Map<ICore, string[]>()
+export function getMessages(core: ICore): string[] {
+    if (!messagesRegistry.has(core)) {
+        messagesRegistry.set(core, [])
+    }
+    return messagesRegistry.get(core)!
 }
 
 export type InputOverrides = Partial<Inputs>
 
-export class TestCore implements ITestCore {
-    messages: string[] = []
+export class TestCore implements ICore {
     localCore: ICore
     inputOverrides?: InputOverrides
 
@@ -19,22 +22,19 @@ export class TestCore implements ITestCore {
 
     // Record logging to run assertions against it
     startGroup(message: string) {
-        this.messages.push(`startGroup: ${message}`)
+        getMessages(this).push(`startGroup: ${message}`)
     }
     endGroup() {
-        this.messages.push(`endGroup`)
+        getMessages(this).push(`endGroup`)
     }
     debug(message: string) {
-        this.messages.push(`debug: ${message}`)
+        getMessages(this).push(`debug: ${message}`)
     }
     warning(message: string) {
-        this.messages.push(`warning: ${message}`)
+        getMessages(this).push(`warning: ${message}`)
     }
     setFailed(message: string) {
-        this.messages.push(`setFaled: ${message}`)
-    }
-    getMessages(): string[] {
-        return this.messages
+        getMessages(this).push(`setFaled: ${message}`)
     }
 
     // Support overriding inputs from inputOverrides passed to constructor
@@ -50,7 +50,7 @@ export class TestCore implements ITestCore {
     }
 }
 
-export async function getTestCore(overrides?: InputOverrides): Promise<ITestCore> {
+export async function getTestCore(overrides?: InputOverrides): Promise<ICore> {
     const localCore = await getLocalCore()
     if (localCore == undefined) {
         throw new Error("Failed to run tests without .env.json file")
