@@ -5,11 +5,11 @@ import { getGithubCore } from "./github"
 
 class LocalCore implements ICore {
     githubCore: ICore
-    config: LocalConfig
+    inputs: LocalConfig["inputs"]
 
-    constructor(config: LocalConfig) {
+    constructor(inputs: LocalConfig["inputs"]) {
         this.githubCore = getGithubCore()
-        this.config = config
+        this.inputs = inputs
     }
 
     // Proxy logging methods
@@ -31,7 +31,7 @@ class LocalCore implements ICore {
 
     // And override inputs based on a local config
     getInput(name: keyof Inputs, options?: { required?: boolean }): string {
-        const value = this.config.inputs[name]
+        const value = this.inputs[name]
         if (typeof (value) === "undefined" && options && options.required) {
             throw new Error(`Input required and not supplied: ${name}`)
         }
@@ -41,5 +41,5 @@ class LocalCore implements ICore {
 
 export async function getLocalCore(): Promise<ICore> {
     const localConfig = await LocalConfig.read()
-    return new LocalCore(localConfig)
+    return new LocalCore(localConfig.inputs)
 }

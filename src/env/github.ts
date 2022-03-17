@@ -1,18 +1,11 @@
-import { IEnv } from "./types"
+import { BaseEnv } from "./base"
 
-const ownerAndRepo = process.env["GITHUB_REPOSITORY"]
-const [owner, repo] = ownerAndRepo?.split("/") || []
-
-export class GithubEnv implements IEnv {
-    getOwner(): string | undefined {
-        return owner
-    }
-
-    getRepo(): string | undefined {
-        return repo
-    }
+export class GithubEnv extends BaseEnv {
 }
 
-export function getGithubEnv(): IEnv {
-    return new GithubEnv()
+export function getGithubEnv(): BaseEnv {
+    if (!process.env["GITHUB_REPOSITORY"]) {
+        throw new Error("GITHUB_REPOSITORY env var is required")
+    }
+    return new GithubEnv({ GITHUB_REPOSITORY: process.env["GITHUB_REPOSITORY"] })
 }
