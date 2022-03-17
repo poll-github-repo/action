@@ -1,0 +1,21 @@
+name: bump v1 tag
+on:
+  release:
+    types: [published]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: yarn install
+      - run: yarn build
+      - run: git add -f dist/index.js
+      - run: git config --global user.email "ci@action.com"
+      - run: git config --global user.name "Release Action"
+      - run: git commit -m "Rebuild dist/index.js"
+      - run: git tag -d v1 || true
+      - run: git tag v1
+      - run: git push --tags -f
