@@ -1,9 +1,10 @@
 name: bump v1 tag
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ master ]
 jobs:
   release:
+    name: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,10 +13,15 @@ jobs:
           node-version: '16'
       - run: yarn install
       - run: yarn build
-      - run: git add -f dist/index.js
+
       - run: git config --global user.email "ci@action.com"
       - run: git config --global user.name "Release Action"
-      - run: git commit -m "Rebuild dist/index.js"
+      - run: git branch -D v1-branch || true
       - run: git tag -d v1 || true
+
+      - run: git checkout -b v1-branch
+      - run: git add -f dist/index.js
+      - run: git commit -m "Rebuild dist/index.js"
       - run: git tag v1
+      - run: git push origin v1-branch -f
       - run: git push --tags -f
