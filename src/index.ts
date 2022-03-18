@@ -21,7 +21,11 @@ async function run() {
     const createSyncCommit = createSyncCommitWith(config, logger)
 
     logger.startGroup("Fetching last sync date")
-    const lastSyncDate = (await getLastSyncDate())!.trim()
+    let maybeLastSyncDate = await getLastSyncDate()
+    if (!maybeLastSyncDate) {
+        logger.setFailed(`Failed to pull sync date from "${config.repoToSyncPath}" file. Does it exist?`)
+    }
+    const lastSyncDate = maybeLastSyncDate!.trim()
     logger.info(`Last sync date is ${lastSyncDate}`)
     logger.endGroup()
 
