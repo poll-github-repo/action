@@ -6,7 +6,7 @@ import { IssueToCreate, CreatedIssue } from "./types"
 export function createTrackingIssuesWith(config: Config, logger: Logger) {
     const token = config.token
     const owner = config.currentRepoOwner
-    const repo = "foo" // config.currentRepo
+    const repo = config.currentRepo
     const label = config.currentRepoLabelToAdd
     const yesCreateIssues = config.yesCreateIssues
 
@@ -22,17 +22,17 @@ export function createTrackingIssuesWith(config: Config, logger: Logger) {
                 body: issueToCreate.body,
                 labels: [label]
             }
-            logger.debug(`=> Creating issue with params ${JSON.stringify(createIssueParams)}`)
+            logger.info(`=> Creating issue with params ${JSON.stringify(createIssueParams)}`)
 
             if (yesCreateIssues) {
                 const { data: issue } = await octokit.rest.issues.create(createIssueParams)
-                logger.debug(`<= Created issue ${JSON.stringify(issue)}`)
+                logger.info(`<= Created issue ${JSON.stringify(issue)}`)
                 createdIssues.push({
                     number: issue.number,
                     url: issue.html_url
                 })
             } else {
-                logger.debug("<= Skipping creating, yesCreateIssues is set to false")
+                logger.info("<= Skipping creating, yesCreateIssues is set to false")
             }
         }
         return createdIssues

@@ -14,8 +14,8 @@ export class TestLogger implements Logger {
     endGroup() {
         this.messages.push(`endGroup`)
     }
-    debug(message: string) {
-        this.messages.push(`debug: ${message}`)
+    info(message: string) {
+        this.messages.push(`info: ${message}`)
     }
     warning(message: string) {
         this.messages.push(`warning: ${message}`)

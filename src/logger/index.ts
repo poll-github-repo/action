@@ -2,7 +2,7 @@ import * as core from "@actions/core"
 
 export interface Logger {
     startGroup(name: string): void
-    debug(message: string): void
+    info(message: string): void
     warning(message: string): void
     setFailed(message: string): void
     endGroup(): void

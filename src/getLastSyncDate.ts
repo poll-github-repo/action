@@ -17,11 +17,10 @@ export function getLastSyncDateWith(config: Config, logger: Logger) {
         })
         const content: string | undefined = (data as unknown as { content?: string }).content
         if (!content) {
-            logger.debug(JSON.stringify(data, null, 4))
+            logger.info(JSON.stringify(data, null, 4))
             logger.setFailed(`Failed to read "${cachePath}" file contents`)
             return null
         }
         return Buffer.from(content, "base64").toString("ascii")
-
     }
 }

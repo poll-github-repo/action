@@ -33,7 +33,7 @@ export function pollCommitsWith(config: Config, logger: Logger) {
         logger.startGroup(`Pulling commits from ${owner}/${repo} since="${since}", path="${path}"`)
         try {
             for await (const { data } of iterator) {
-                logger.debug(`Pulled a page with ${data.length} commits`)
+                logger.info(`Pulled a page with ${data.length} commits`)
                 for (const commitData of data) {
                     let commit: Commit = {
                         path,
@@ -42,7 +42,7 @@ export function pollCommitsWith(config: Config, logger: Logger) {
                         message: commitData.commit.message,
                         date: commitData.commit.author?.date || "--unknown-date--"
                     }
-                    logger.debug(`Extracted commit ${JSON.stringify(commit)}`)
+                    logger.info(`Extracted commit ${JSON.stringify(commit)}`)
                     result.push(commit)
                 }
             }

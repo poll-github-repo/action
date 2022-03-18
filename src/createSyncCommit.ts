@@ -11,7 +11,7 @@ export function createSyncCommitWith(config: Config, logger: Logger) {
 
     return async function createSyncCommit(): Promise<string | undefined> {
         if (!yesCreateIssues) {
-            logger.debug(`Skipping updating ${cachePath} because yesCreateIssues is set to false`)
+            logger.info(`Skipping updating ${cachePath} because yesCreateIssues is set to false`)
             return undefined
         }
 
