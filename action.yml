@@ -1,6 +1,10 @@
-name: Monitor changes to files in other repos and create tracking issues in your repo
+name: Track and record changes in other repos
 description: Cron-based job that continuously polls configured repo for changes and creates tracking issues for them
 author: Ilya Bylich
+
+branding:
+  color: yellow
+  icon: arrow-down-circle
 
 inputs:
   repo-to-sync:
