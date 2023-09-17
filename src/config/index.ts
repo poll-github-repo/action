@@ -6,12 +6,12 @@ export interface Config {
     currentRepoOwner: string
     currentRepo: string
     currentRepoCachePath: string
-    currentRepoLabelToAdd: string
+    currentRepoLabelToAdd?: string
     repoToSyncOwner: string
     repoToSync: string
     repoToSyncPath: string
-    trackingIssueTemplateTitle: string
-    trackingIssueTemplateBody: string[]
+    trackingIssueTemplateTitle?: string
+    trackingIssueTemplateBody?: string[]
     yesCreateIssues: boolean
 }
 

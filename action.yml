@@ -24,8 +24,11 @@ inputs:
       Can be something like ".sync/CHANGELOG.md.last-sync".
     required: true
   tracking-issue-label:
-    description: Label you want to add to created issues.
-    required: true
+    description: |
+      Label you want to add to created issues.
+      
+      Only works when yes-create-issues is set to true
+    required: false
   tracking-issue-title:
     description: |
       Template for tracking issue title.
@@ -36,7 +39,9 @@ inputs:
       - {{ message }} - message of the observed commit
       - {{ commit-date }} - creation date of the observer commit
       - {{ url }} - GitHub URL that points to observer commit
-    required: true
+      
+      Only works when yes-create-issues is set to true
+    required: false
   tracking-issue-body:
     description: |
       Template for tracking issue body.
@@ -47,7 +52,9 @@ inputs:
       - {{ message }} - message of the observed commit
       - {{ commit-date }} - creation date of the observer commit
       - {{ url }} - GitHub URL that points to observer commit
-    required: true
+      
+      Only works when yes-create-issues is set to true
+    required: false
   token:
     description: GitHub token, most probably you want "secrets.GITHUB_TOKEN"
     required: true

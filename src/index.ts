@@ -1,11 +1,12 @@
 import { pollCommitsWith } from "./pollCommits"
 import { renderIssueTemplatesWith } from "./renderIssueTemplates"
 import { getLastSyncDateWith } from "./getLastSyncDate"
-import { getLogger } from "./logger"
-import { load as loadConfig } from "./config"
+import { getLogger, Logger } from "./logger"
+import { Config, load as loadConfig } from "./config"
 import { createTrackingIssuesWith } from "./createTrackingIssues"
 import { createSyncCommitWith } from "./createSyncCommit"
 import { setActionOutput } from "./setActionOutput";
+import { Commit } from "./types";
 
 async function run() {
     const config = await loadConfig()
@@ -17,8 +18,6 @@ async function run() {
 
     const getLastSyncDate = getLastSyncDateWith(config, logger)
     const pollCommits = pollCommitsWith(config, logger)
-    const renderIssueTemplates = renderIssueTemplatesWith(config)
-    const createTrackingIssues = createTrackingIssuesWith(config, logger)
     const createSyncCommit = createSyncCommitWith(config, logger)
 
     logger.startGroup("Fetching last sync date")
@@ -35,21 +34,7 @@ async function run() {
     logger.info(JSON.stringify(commits, null, 4))
     logger.endGroup()
 
-    logger.startGroup("Starting rendering")
-    const issuesToCreate = renderIssueTemplates(commits)
-    issuesToCreate.forEach(({ title, body }) => {
-        logger.info("=== TITLE")
-        logger.info(title)
-        logger.info("=== BODY")
-        logger.info(body)
-    })
-    logger.endGroup()
-
-    logger.startGroup("Creating tracking issues")
-    const createdIssues = await createTrackingIssues(issuesToCreate)
-    logger.info(`Created issues:`)
-    logger.info(JSON.stringify(createdIssues, null, 4))
-    logger.endGroup()
+    const createdIssues = config.yesCreateIssues ? await createIssues(config, logger, commits) : [];
 
     logger.startGroup("Saving last sync date")
     const syncCommitUrl = await createSyncCommit()
@@ -60,6 +45,29 @@ async function run() {
     const actionOutput = setActionOutput(createdIssues, commits)
     logger.info(`Set action output: ${JSON.stringify(actionOutput, null, 4)}`)
     logger.endGroup()
+}
+
+async function createIssues(config: Config, logger: Logger, commits: Commit[]) {
+    logger.startGroup("Starting rendering")
+    const renderIssueTemplates = renderIssueTemplatesWith(config)
+
+    const issuesToCreate = renderIssueTemplates(commits)
+    issuesToCreate.forEach(({ title, body }) => {
+        logger.info("=== TITLE")
+        logger.info(title)
+        logger.info("=== BODY")
+        logger.info(body)
+    })
+    logger.endGroup()
+
+    logger.startGroup("Creating tracking issues")
+    const createTrackingIssues = createTrackingIssuesWith(config, logger)
+    const createdIssues = await createTrackingIssues(issuesToCreate)
+    logger.info(`Created issues:`)
+    logger.info(JSON.stringify(createdIssues, null, 4))
+    logger.endGroup()
+
+    return createdIssues
 }
 
 run()
