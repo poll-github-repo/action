@@ -5,6 +5,7 @@ import { getLogger } from "./logger"
 import { load as loadConfig } from "./config"
 import { createTrackingIssuesWith } from "./createTrackingIssues"
 import { createSyncCommitWith } from "./createSyncCommit"
+import { setActionOutput } from "./setActionOutput";
 
 async function run() {
     const config = await loadConfig()
@@ -55,6 +56,10 @@ async function run() {
     logger.info(`Created commit ${syncCommitUrl}`)
     logger.endGroup()
 
+    logger.startGroup("Starting output creation")
+    const actionOutput = setActionOutput(createdIssues, commits)
+    logger.info(`Set action output: ${JSON.stringify(actionOutput, null, 4)}`)
+    logger.endGroup()
 }
 
 run()
