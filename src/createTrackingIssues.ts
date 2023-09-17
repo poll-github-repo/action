@@ -7,7 +7,7 @@ export function createTrackingIssuesWith(config: Config, logger: Logger) {
     const token = config.token
     const owner = config.currentRepoOwner
     const repo = config.currentRepo
-    const label = config.currentRepoLabelToAdd
+    const label = config.currentRepoLabelToAdd!
     const yesCreateIssues = config.yesCreateIssues
 
     return async function createTrackingIssues(issuesToCreate: IssueToCreate[]): Promise<CreatedIssue[]> {

@@ -15,5 +15,5 @@ export const testConfig: Config = {
         "Commit date: {{ commit-date }}",
         "Full SHA: {{ sha-full }}"
     ],
-    yesCreateIssues: false
+    yesCreateIssues: true
 }

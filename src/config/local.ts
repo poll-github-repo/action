@@ -30,17 +30,17 @@ namespace validations {
             yesCreateIssues
         } = config
 
+        if (yesCreateIssues !== true && yesCreateIssues !== false) formatErr(`["yesCreateIssues"] must be a boolean`)
         if (!isString(token)) stringErr("token")
         if (!isString(currentRepoOwner)) stringErr("currentRepoOwner")
         if (!isString(currentRepo)) stringErr("currentRepo")
         if (!isString(currentRepoCachePath)) stringErr("currentRepoCachePath")
-        if (!isString(currentRepoLabelToAdd)) stringErr("currentRepoLabelToAdd")
+        if ((yesCreateIssues || currentRepoLabelToAdd !== undefined) && !isString(currentRepoLabelToAdd)) stringErr("currentRepoLabelToAdd")
         if (!isString(repoToSyncOwner)) stringErr("repoToSyncOwner")
         if (!isString(repoToSync)) stringErr("repoToSync")
         if (!isString(repoToSyncPath)) stringErr("repoToSyncPath")
-        if (!isString(trackingIssueTemplateTitle)) stringErr("trackingIssueTemplateTitle")
-        if (!Array.isArray(trackingIssueTemplateBody)) formatErr(`["trackingIssueTemplateBody"] must be an array of strings`)
-        if (yesCreateIssues !== true && yesCreateIssues !== false) formatErr(`["yesCreateIssues"] must be a boolean`)
+        if ((yesCreateIssues || trackingIssueTemplateTitle !== undefined) && !isString(trackingIssueTemplateTitle)) stringErr("trackingIssueTemplateTitle")
+        if ((yesCreateIssues || trackingIssueTemplateBody !== undefined) && !Array.isArray(trackingIssueTemplateBody)) formatErr(`["trackingIssueTemplateBody"] must be an array of strings`)
 
         return {
             token,
