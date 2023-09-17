@@ -17,7 +17,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '20'
 
       - name: install dependencies
         run: yarn install
@@ -37,7 +37,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '20'
 
       - name: install dependencies
         run: yarn install
