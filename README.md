@@ -84,6 +84,36 @@ Available placeholders:
 + `{{ commit-date }}` - creation date of the observer commit
 + `{{ url }}` - GitHub URL that points to observer commit
 
+Step outputs:
+
+* `newCommitsInSyncRepo`: A boolean indicating wheter there where any new commits to the synced repo or not
+* `newCommits`: If `newCommitsInSyncRepo` is true, this contains a stringified JSON array containing an object for each commit with its path,
+  url, sha, message and date:
+
+```json
+[
+  {
+    "path": "data.txt",
+    "url": "https://github.com/poll-github-repo/dummy-source-repo/commit/a52684431a3fda35c2ac4cde291071a3430f2268",
+    "sha": "a52684431a3fda35c2ac4cde291071a3430f2268",
+    "message": "update data.txt (three)",
+    "date": "2022-03-14T16:23:55Z"
+  }
+]
+```
+
+* `createdIssues`:  If `yes-create-issues` is true, this contains a stringified JSON array containing an object with the issue number
+  and its url for each created issue:
+
+```json
+[
+  {
+    "number": 1,
+    "url": "https://github.com/poll-github-repo/dummy-observer-repo/issues/1"
+  }
+]
+```
+
 ### Example
 
 `poll-github-repo` action has two dummy repositories:
