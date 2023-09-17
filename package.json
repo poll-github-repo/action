@@ -1,6 +1,6 @@
 {
     "name": "@poll-github-repo/action",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "scripts": {
         "build": "ncc build src/index.ts -o dist",
         "test": "TEST_ENV=1 jest",
